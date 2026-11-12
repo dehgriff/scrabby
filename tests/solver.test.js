@@ -127,10 +127,10 @@ test('rack validation rejects wrong length, case and nonletters', () => {
   for (const rack of ['', 'ABC', 'ABCDEFGHIJKLM', 'abcdefghijkl', 'ABCDEFGHIJK!']) {
     assert.throws(() => solveRack(rack, dictionary, shapes), /12 letters/);
   }
-  assert.throws(() => solveRack('ABCDEFGHI???', dictionary, shapes), /at most two/);
+  assert.throws(() => solveRack('ABCDEFGH????', dictionary, shapes), /at most 3/);
 });
 
-for (const rack of ['AEINORSTATE?', 'AEINORSTAT??']) {
+for (const rack of ['AEINORSTATE?', 'AEINORSTAT??', 'AEINORSTA???']) {
   test(`${rack}: blanks make a valid 17-point optimum`, () => {
     const result = solveRack(rack, dictionary, shapes);
     validate(result, rack);
@@ -158,6 +158,16 @@ test('two blanks cannot supply three As, even though each AA word fits in isolat
   assert.equal(result.blankIndices.length, 2);
   assert.equal(result.cells.length, 2);
   assert.equal(result.unused.length, 10);
+});
+
+test('three blanks can supply three As at a crossing but cannot supply a fourth', () => {
+  const rack = 'ZZZZZZZZZ???';
+  const result = solveRack(rack, ['AA'], shapes);
+  validate(result, rack, new Set(['AA']));
+  assert.equal(result.score, 4);
+  assert.equal(result.blankIndices.length, 3);
+  assert.equal(result.cells.length, 3);
+  assert.equal(result.unused.length, 9);
 });
 
 test('unused blanks remain available when no allowed word needs them', () => {

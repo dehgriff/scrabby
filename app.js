@@ -1,4 +1,4 @@
-import { getSlots } from './solver.js';
+import { getSlots, MAX_BLANKS } from './solver.js';
 
 const $ = id => document.getElementById(id);
 let rack = [];
@@ -24,7 +24,7 @@ function createWorker() {
       $('search-status').textContent = best.words.length
         ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · SOWPODS with your word lists`
         : rejectedWords.size ? 'No valid words remain with these rejections. Reset rejections to try the full list again.' : 'No valid word can be made with these letters. Try a different rack.';
-      if (matchMedia('(max-width: 640px)').matches) {
+      if (matchMedia('(max-width: 640px), (orientation: landscape) and (max-height: 600px)').matches) {
         document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }
     }
@@ -88,7 +88,7 @@ function changeRack(next) {
 }
 
 function addLetter(letter) {
-  if (letter === '?' && rack.filter(ch => ch === '?').length >= 2) return;
+  if (letter === '?' && rack.filter(ch => ch === '?').length >= MAX_BLANKS) return;
   if (rack.length < 12) changeRack([...rack, letter]);
 }
 
@@ -105,8 +105,8 @@ function renderInput() {
   $('letter-count').textContent = rack.length;
   for (const key of $('keyboard').children) key.disabled = rack.length === 12;
   const blanks = rack.filter(ch => ch === '?').length;
-  $('blank').disabled = rack.length === 12 || blanks === 2;
-  $('blank-count').textContent = `${blanks} / 2 blanks used`;
+  $('blank').disabled = rack.length === 12 || blanks >= MAX_BLANKS;
+  $('blank-count').textContent = `${blanks} / ${MAX_BLANKS} blanks used`;
   $('clear').disabled = rack.length === 0;
   $('solve').disabled = !busy && rack.length !== 12;
   $('solve-label').textContent = busy ? 'Stop search' : rack.length === 12 ? 'Find best arrangement' : `Choose ${12 - rack.length} ${rack.length === 11 ? 'more letter' : 'letters'}`;
@@ -229,7 +229,7 @@ document.addEventListener('keydown', event => {
 });
 try {
   const saved = localStorage.getItem('scrabby-rack') || '';
-  if (/^[A-Z?]{0,12}$/.test(saved) && [...saved].filter(ch => ch === '?').length <= 2) rack = [...saved];
+  if (/^[A-Z?]{0,12}$/.test(saved) && [...saved].filter(ch => ch === '?').length <= MAX_BLANKS) rack = [...saved];
 } catch { /* The app works without local storage. */ }
 renderInput();
 createWorker();

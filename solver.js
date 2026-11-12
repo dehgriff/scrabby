@@ -1,5 +1,7 @@
 // Exact search: all connected shapes, in descending score order. Transposition
 // preserves reading direction, so each shape and its transpose need only one entry.
+export const MAX_BLANKS = 3;
+
 export function getSlots(cells) {
   const index = new Map(Array.from(cells, (p, i) => [p, i]));
   const slots = [];
@@ -25,7 +27,7 @@ export function scoreBoard(cells, letters) {
 export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedWords = []) {
   if (!/^[A-Z?]{12}$/.test(rack)) throw new Error('Choose exactly 12 letters or blanks.');
   const blanks = [...rack].filter(ch => ch === '?').length;
-  if (blanks > 2) throw new Error('Choose at most two blank tiles.');
+  if (blanks > MAX_BLANKS) throw new Error(`Choose at most ${MAX_BLANKS} blank tiles.`);
   const counts = new Int8Array(26);
   for (const ch of rack) if (ch !== '?') counts[ch.charCodeAt(0) - 65]++;
   const byLength = Array.from({ length: 13 }, () => []);

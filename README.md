@@ -1,6 +1,6 @@
 # Scrabby
 
-A mobile-friendly crossword word-game solver. Tap 12 letters and get a **proven optimal arrangement**, using SOWPODS. Everything runs client side in JavaScript, with the search in a Web Worker to keep the interface responsive.
+A dark-themed, mobile-friendly crossword word-game solver. Letter buttons become larger in landscape; on landscape phones the keyboard uses the full screen width. Tap 12 letters and get a **proven optimal arrangement**, using SOWPODS. Everything runs client side in JavaScript, with the search in a Web Worker to keep the interface responsive.
 
 ## Run
 
@@ -39,7 +39,7 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 ## Use
 
 - Tap letter buttons 12 times; repeats are supported. The search starts automatically.
-- Up to two of the 12 tiles can be blanks. Tap **? Blank tile**, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
+- Up to three of the 12 tiles can be blanks. Tap **? Blank tile**, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
 - Tap a selected tile to remove it, or choose **Clear all**.
 - On a computer, type letters and use Backspace to remove the last tile.
 - Tap a result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
@@ -51,7 +51,7 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 
 Words read left to right and downwards. Every maximal horizontal or vertical run of two or more tiles must be in SOWPODS. All used tiles connect by edges. One-letter runs do not count as words. Unused letters are permitted, with the bonus awarded only when all 12 are used.
 
-Two- and three-letter words must also appear in their respective editable allowed lists below. Each of up to two blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
+Two- and three-letter words must also appear in their respective editable allowed lists below. Each of up to three blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
 
 A longest word always runs horizontally and is highlighted in the solution. When needed, the solver swaps rows and columns, preserving every word, blank and the optimal score. If several words tie for longest, a horizontal one is highlighted.
 
@@ -102,4 +102,4 @@ The shape binary has variable-length records: tile count (one byte), score (one 
 npm test
 ```
 
-Tests cover the shape catalogue and scores, dictionary integrity, 17-point solutions with zero, one and two blanks, blank sharing at crossings, insufficient blanks, two- and three-letter filtering, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, connectivity and invalid inputs. Result validation independently reconstructs the board and every word, including the exact physical tiles and blanks spent.
+Tests cover the shape catalogue and scores, dictionary integrity, 17-point solutions with zero, one, two and three blanks, blank sharing at crossings, insufficient blanks, two- and three-letter filtering, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, connectivity and invalid inputs. Result validation independently reconstructs the board and every word, including the exact physical tiles and blanks spent.
