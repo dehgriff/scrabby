@@ -5,6 +5,8 @@ let rack = [];
 let worker;
 let busy = false;
 let best = null;
+let mainWord = '';
+const rejectedWords = new Set();
 let started = 0;
 let timer;
 let progress = 'Searching the highest-scoring shapes';
@@ -21,7 +23,7 @@ function createWorker() {
       renderResult(best);
       $('search-status').textContent = best.words.length
         ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · SOWPODS with your word lists`
-        : 'No valid word can be made with these letters. Try a different rack.';
+        : rejectedWords.size ? 'No valid words remain with these rejections. Reset rejections to try the full list again.' : 'No valid word can be made with these letters. Try a different rack.';
       if (matchMedia('(max-width: 640px)').matches) {
         document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }
@@ -51,6 +53,8 @@ function finish() {
 
 function resetResult() {
   best = null;
+  mainWord = '';
+  $('reject').disabled = true;
   $('solution').hidden = true;
   $('empty-state').hidden = false;
   $('result-badge').textContent = 'THE POSSIBILITIES AWAIT';
@@ -75,6 +79,8 @@ function persist() {
 function changeRack(next) {
   if (busy) stopSearch();
   rack = next;
+  rejectedWords.clear();
+  renderRejections();
   persist();
   resetResult();
   renderInput();
@@ -106,6 +112,21 @@ function renderInput() {
   $('solve-label').textContent = busy ? 'Stop search' : rack.length === 12 ? 'Find best arrangement' : `Choose ${12 - rack.length} ${rack.length === 11 ? 'more letter' : 'letters'}`;
   $('solve-icon').textContent = busy ? '□' : '↗';
   $('input-hint').textContent = busy ? 'Working entirely on your device' : 'Solves automatically at 12 tiles';
+  $('reject').disabled = busy || !best || !mainWord;
+  $('reset-rejections').disabled = busy || !rejectedWords.size;
+}
+
+function renderRejections() {
+  $('rejections').hidden = !rejectedWords.size;
+  $('rejected-words').textContent = `Rejected for this rack: ${[...rejectedWords].join(', ')}`;
+}
+
+function rejectMainWord() {
+  if (busy || !best || !mainWord) return;
+  rejectedWords.add(mainWord);
+  renderRejections();
+  resetResult();
+  solve();
 }
 
 function solve() {
@@ -125,7 +146,7 @@ function solve() {
     $('search-status').textContent = `${progress} · ${Math.floor((performance.now() - started) / 1000)}s`;
   }, 500);
   renderInput();
-  worker.postMessage({ rack: rack.join('') });
+  worker.postMessage({ rack: rack.join(''), rejectedWords: [...rejectedWords] });
 }
 
 function renderResult(result) {
@@ -144,6 +165,9 @@ function renderResult(result) {
   $('board').style.setProperty('--board-width', `${cols * 43 + (cols - 1) * 4}px`);
   const slots = getSlots(result.cells);
   const longest = slots.find(slot => slot.length === result.longest && result.cells[slot[1]] - result.cells[slot[0]] === 1) || [];
+  mainWord = longest.map(i => result.letters[i]).join('');
+  $('reject').textContent = mainWord ? `Reject “${mainWord}” & try again` : 'Reject long word & try again';
+  $('reject').disabled = busy || !mainWord;
   const blankIndices = result.blankIndices || [];
   $('board').replaceChildren(...result.cells.map((p, i) => {
     const tile = document.createElement('span');
@@ -187,6 +211,14 @@ for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
 $('clear').onclick = () => changeRack([]);
 $('blank').onclick = () => addLetter('?');
 $('solve').onclick = () => busy ? stopSearch() : solve();
+$('reject').onclick = rejectMainWord;
+$('reset-rejections').onclick = () => {
+  if (busy) return;
+  rejectedWords.clear();
+  renderRejections();
+  resetResult();
+  solve();
+};
 $('example').onclick = () => changeRack([...'AEINORSTATED']);
 document.addEventListener('keydown', event => {
   if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;

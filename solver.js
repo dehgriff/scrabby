@@ -22,7 +22,7 @@ export function scoreBoard(cells, letters) {
   return { score: longest + words.length + bonus, longest, bonus, words };
 }
 
-export function solveRack(rack, dictionary, shapes, report = () => {}) {
+export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedWords = []) {
   if (!/^[A-Z?]{12}$/.test(rack)) throw new Error('Choose exactly 12 letters or blanks.');
   const blanks = [...rack].filter(ch => ch === '?').length;
   if (blanks > 2) throw new Error('Choose at most two blank tiles.');
@@ -30,8 +30,9 @@ export function solveRack(rack, dictionary, shapes, report = () => {}) {
   for (const ch of rack) if (ch !== '?') counts[ch.charCodeAt(0) - 65]++;
   const byLength = Array.from({ length: 13 }, () => []);
   const needed = new Int8Array(26);
+  const rejected = new Set(rejectedWords);
   for (const word of dictionary) {
-    if (word.length < 2 || word.length > 12) continue;
+    if (word.length < 2 || word.length > 12 || rejected.has(word)) continue;
     needed.fill(0);
     let valid = true;
     let missing = 0;

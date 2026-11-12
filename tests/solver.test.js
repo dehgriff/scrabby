@@ -216,3 +216,57 @@ test('checked-in editable lists contain only valid SOWPODS words', () => {
   const filtered = prepareDictionary(dictionary.join('\n'), pairs, triples);
   for (const word of filtered.filter(w => w.length <= 3)) assert.ok(words.has(word));
 });
+
+function mainWord(result) {
+  const slot = getSlots(result.cells).find(s => s.length === result.longest && result.cells[s[1]] - result.cells[s[0]] === 1);
+  return slot ? slot.map(i => result.letters[i]).join('') : '';
+}
+
+test('successive rejections exclude every rejected word from results and progress candidates', () => {
+  const rack = 'AEINORSTATED';
+  const rejected = [];
+  let result = solveRack(rack, dictionary, shapes);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    rejected.push(mainWord(result));
+    const updates = [];
+    result = solveRack(rack, dictionary, shapes, update => updates.push(update), rejected);
+    validate(result, rack);
+    assert.equal(result.optimal, true);
+    assert.ok(result.words.length);
+    for (const candidate of [result, ...updates.filter(u => u.type === 'best').map(u => u.result)]) {
+      for (const word of rejected) assert.ok(!candidate.words.includes(word), `${word} must remain rejected`);
+    }
+  }
+  // Retrying without exclusions restores the original deterministic solution.
+  assert.equal(mainWord(solveRack(rack, dictionary, shapes)), rejected[0]);
+});
+
+test('rejection works with two blanks and leaves dictionary inputs unchanged', () => {
+  const rack = 'AEINORSTAT??';
+  const first = solveRack(rack, dictionary, shapes);
+  const rejected = [mainWord(first)];
+  const result = solveRack(rack, dictionary, shapes, () => {}, rejected);
+  validate(result, rack);
+  assert.ok(!result.words.includes(rejected[0]));
+  assert.equal(result.optimal, true);
+  assert.deepEqual(rejected, [mainWord(first)]);
+  assert.ok(dictionary.includes(rejected[0]));
+});
+
+test('rejecting every available word returns no solution rather than recycling a rejected word', () => {
+  const rack = 'AAAAAAAAAAAA';
+  const updates = [];
+  const result = solveRack(rack, ['AA'], shapes, u => updates.push(u), ['AA']);
+  validate(result, rack, new Set());
+  assert.equal(result.score, 0);
+  assert.equal(result.optimal, true);
+  assert.equal(result.unused.length, 12);
+  assert.equal(updates.length, 0);
+});
+
+test('rejections match whole words, preserving longer words with the same prefix', () => {
+  const rack = 'CATZZZZZZZZ?';
+  const result = solveRack(rack, ['CAT', 'CATS'], shapes, () => {}, ['CAT']);
+  validate(result, rack, new Set(['CATS']));
+  assert.deepEqual(result.words, ['CATS']);
+});

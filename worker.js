@@ -26,7 +26,7 @@ ready.then(() => postMessage({ type: 'ready' })).catch(error => postMessage({ ty
 self.onmessage = async ({ data }) => {
   try {
     const [dictionary, shapes] = await ready;
-    const result = solveRack(data.rack, dictionary, shapes, update => postMessage(update));
+    const result = solveRack(data.rack, dictionary, shapes, update => postMessage(update), data.rejectedWords || []);
     postMessage({ type: 'result', result });
   } catch (error) {
     postMessage({ type: 'error', message: error.message });

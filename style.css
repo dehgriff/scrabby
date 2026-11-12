@@ -10,4 +10,7 @@
 .rack-tile.blank-rack-tile{background:#f7f1e3;border-color:#d9c9a9;color:#75603c;box-shadow:0 2px 0 #d9c9a9}
 .board-cell.blank{position:relative;border:2px dashed #876337}.board-cell.blank:after{content:'?';position:absolute;bottom:1px;right:3px;font-size:9px;line-height:1;font-weight:700}
 .blank-note{color:#80663f;font-size:10px;line-height:1.5;margin:-6px 0 14px;text-align:center}
+.solution-actions{margin:12px 0 0}.reject-button{min-height:44px;padding:8px 12px;border:1px solid #d8cbe4;border-radius:6px;background:#f5f0f8;color:var(--purple);font-size:11px;font-weight:600;max-width:100%;overflow-wrap:anywhere}
+.reject-button:hover:not(:disabled){background:#eae0f2}.reject-button:disabled{opacity:.45}
+.rejections{margin-top:18px;padding-top:12px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}.rejections p{margin:0 0 5px}
 @media(prefers-reduced-motion:reduce){*,*:before{animation:none!important;transition:none!important}}
