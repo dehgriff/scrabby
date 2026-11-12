@@ -4,7 +4,7 @@ A mobile-friendly crossword word-game solver. Tap 12 letters and get a **proven 
 
 ## Run
 
-Requires Node.js 18 or newer. No npm dependencies or build step.
+Requires Node.js 18 or newer. No npm dependencies; local development needs no build step.
 
 ```sh
 cd ~/src/blue/scrabby
@@ -16,6 +16,25 @@ Open **http://localhost:5173** on your Mac. On your phone, connect to the same W
 You can also serve these files from any static web host, including GitHub Pages. Serve over HTTP(S), not by opening `index.html` directly. The app has no server-side solver, accounts, API keys, analytics, or external runtime dependencies.
 
 On HTTPS or localhost, a service worker caches the app and data for offline use after the first complete load. A plain HTTP LAN address works for solving but cannot install an offline service worker. Use a current Safari, Chrome, Firefox or Edge (gzip `DecompressionStream` and module workers are required). On mobile, use the browser’s **Add to Home Screen** option for convenient access.
+
+## Build and deploy to Cloudflare Pages
+
+```sh
+npm run build
+```
+
+This recreates `dist/` with only the app's runtime files, compressed dictionary and shapes, and a Cloudflare `_headers` file. No dependency installation, bundling or data regeneration is needed. Deploy the contents of `dist/` to your static host.
+
+For a [Cloudflare Pages Git integration](https://developers.cloudflare.com/pages/configuration/build-configuration/), use:
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | None |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Root directory | Leave blank (repository root) |
+
+Alternatively, build locally and upload the `dist` folder through Cloudflare Pages Direct Upload. Commit `scripts/build.js`, `package.json` and `.gitignore`; `dist/` is generated and ignored by Git. The hosted app runs entirely in the browser; no Pages Functions or backend configuration is needed.
 
 ## Use
 
