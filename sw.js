@@ -1,5 +1,5 @@
-const CACHE = 'scrabby-v2';
-const ASSETS = ['./', './index.html', './style.css', './app.js', './solver.js', './worker.js', './icon.svg', './manifest.webmanifest', './data/sowpods.txt.gz', './data/shapes.bin.gz'];
+const CACHE = 'scrabby-v4';
+const ASSETS = ['./', './index.html', './style.css', './app.js', './solver.js', './dictionary.js', './worker.js', './icon.svg', './manifest.webmanifest', './data/sowpods.txt.gz', './data/shapes.bin.gz', './data/two-letter-words.txt', './data/three-letter-words.txt'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

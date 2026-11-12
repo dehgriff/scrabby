@@ -26,10 +26,11 @@
       <div class="workspace">
         <section class="input-panel panel" aria-labelledby="letters-title">
           <div class="section-heading"><h2 id="letters-title"><span class="step">01</span> Your letters</h2><span class="counter"><strong id="letter-count">0</strong> / 12</span></div>
-          <p class="panel-copy">Tap your tiles. Repeated letters are welcome.</p>
+          <p class="panel-copy">Tap your tiles. Repeats and up to two blanks are welcome.</p>
           <div class="rack" id="rack" aria-label="Your 12 letter tiles"></div>
           <div class="rack-actions"><span>Tap a tile to remove it</span><button id="clear" class="text-button" disabled>Clear all <span aria-hidden="true">↺</span></button></div>
           <div class="keyboard" id="keyboard" aria-label="Choose letters"></div>
+          <div class="blank-controls"><button id="blank" class="blank-key" aria-label="Add blank tile"><span aria-hidden="true">?</span> Blank tile</button><span id="blank-count">0 / 2 blanks used</span></div>
           <button class="solve-button" id="solve" disabled><span id="solve-label">Choose 12 letters</span><span id="solve-icon" aria-hidden="true">↗</span></button>
           <div class="input-footer"><span id="input-hint">Solves automatically at 12 tiles</span><button id="example" class="text-button">Try an example</button></div>
           <p class="error" id="error" role="alert" hidden></p>
@@ -50,6 +51,7 @@
           <div id="solution" hidden>
             <div class="solution-heading"><div><p class="eyebrow" id="solution-kicker">PROVEN OPTIMAL</p><h3 id="solution-title">Your letters, working together.</h3></div><div class="score-total"><strong id="score">17</strong><span>POINTS</span></div></div>
             <div class="board-area"><div id="board" class="board" aria-label="Crossword solution"></div></div>
+            <p id="blank-note" class="blank-note" hidden></p>
             <div id="unused" class="unused" hidden></div>
             <div class="score-breakdown"><div><strong id="longest-score">6</strong><span>Longest word</span></div><span>+</span><div><strong id="words-score">10</strong><span>Words made</span></div><span>+</span><div><strong id="bonus-score">1</strong><span>All 12 tiles</span></div></div>
             <div class="word-list-heading"><h4>The words you made</h4><span>Tap to highlight</span></div><div id="words" class="words"></div>
@@ -58,7 +60,7 @@
         </section>
       </div>
 
-      <details class="rules"><summary><span class="info-icon">i</span> A quick note on the rules <span class="details-plus" aria-hidden="true">+</span></summary><div class="rules-content"><p>Words read left to right and top to bottom. Every uninterrupted row or column of two or more letters must be in SOWPODS, and all used tiles must connect edge to edge.</p><p><strong>Your score = longest word length + number of words + 1 if all 12 tiles are used.</strong> A 17-point arrangement is the theoretical maximum. If your letters can’t make it, Scrabby searches for the highest possible score, including arrangements with unused tiles.</p><p>The solver checks every connected shape in score order. Difficult racks may take longer; you can stop and keep the best result found. The bundled list is the traditional 267,751-word SOWPODS list, rather than the latest Collins edition.</p></div></details>
+      <details class="rules"><summary><span class="info-icon">i</span> A quick note on the rules <span class="details-plus" aria-hidden="true">+</span></summary><div class="rules-content"><p>Words read left to right and top to bottom. Every uninterrupted row or column of two or more letters must be in SOWPODS. Two- and three-letter words must also be in their respective allowed lists, and all used tiles must connect edge to edge.</p><p><strong>Your score = longest word length + number of words + 1 if all 12 tiles are used.</strong> A 17-point arrangement is the theoretical maximum. If your letters can’t make it, Scrabby searches for the highest possible score, including arrangements with unused tiles.</p><p>The solver checks every connected shape in score order. Difficult racks may take longer; you can stop and keep the best result found. Up to two of your 12 tiles can be blanks, each representing any letter. They count towards word length and the all-tiles bonus. Tiles marked ? in the solution show their chosen letters. The bundled list is the traditional 267,751-word SOWPODS list, rather than the latest Collins edition.</p></div></details>
     </main>
     <footer class="footer"><span>Small tiles. Big possibilities.</span><span>Made for the love of word games.</span></footer>
   </div>

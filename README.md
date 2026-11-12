@@ -39,6 +39,7 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 ## Use
 
 - Tap letter buttons 12 times; repeats are supported. The search starts automatically.
+- Up to two of the 12 tiles can be blanks. Tap **? Blank tile**, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
 - Tap a selected tile to remove it, or choose **Clear all**.
 - On a computer, type letters and use Backspace to remove the last tile.
 - Tap a result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
@@ -49,6 +50,10 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 
 Words read left to right and downwards. Every maximal horizontal or vertical run of two or more tiles must be in SOWPODS. All used tiles connect by edges. One-letter runs do not count as words. Unused letters are permitted, with the bonus awarded only when all 12 are used.
 
+Two- and three-letter words must also appear in their respective editable allowed lists below. Each of up to two blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
+
+A longest word always runs horizontally and is highlighted in the solution. When needed, the solver swaps rows and columns, preserving every word, blank and the optimal score. If several words tie for longest, a horizontal one is highlighted.
+
 ```
 score = longest word length + number of word placements + (all 12 used ? 1 : 0)
 ```
@@ -58,6 +63,22 @@ The solver enumerates **every connected shape of 2–12 tiles**, normalised by t
 Shapes are searched in descending score order. For each shape, a constraint search fills every horizontal/vertical word slot using rack-compatible dictionary words, respecting crossings and exact tile multiplicities. It chooses the slot with the fewest remaining candidates and uses positional word indexes. The first feasible shape is globally optimal. A valid longest-word baseline is returned immediately while the search continues. If all higher scores fail, that baseline is also proven optimal. A rack with no possible two-letter-or-longer word returns zero points and all letters unused.
 
 Typical racks solve quickly, but this is exhaustive search and difficult racks can take longer on mobile. There is no time limit that silently turns an approximate result into an “optimal” one.
+
+## Choose your two- and three-letter words
+
+Edit the appropriate file, with one allowed word per line:
+
+- **`data/two-letter-words.txt`** starts with all 124 two-letter SOWPODS words.
+- **`data/three-letter-words.txt`** starts with all 1,292 three-letter SOWPODS words.
+
+Delete any lines you do not want the solver to use. Blank lines and `#` comments are allowed. An empty list disables all words of that length. Each list only affects complete words of its own length: four-letter and longer words remain available, even if they contain a removed pair or triple.
+
+You do **not** need to edit `data/sowpods.txt`, recompress the dictionary, or regenerate shapes for this. The app reads the allowed lists separately. Invalid or non-SOWPODS entries produce an error with the relevant filename and line number, including during a build.
+
+- **Locally:** save either list and reload the page to load it into a fresh solver.
+- **Cloudflare Pages:** commit and push the edited lists; your usual `npm run build` includes both in `dist/`. Reload the deployed app once the deployment finishes. The lists refresh when online and are cached for offline use.
+
+Keep both word-list files in Git alongside the other source files. Restore a removed word by putting it back on its own line.
 
 ## Dictionary and data
 
@@ -80,4 +101,4 @@ The shape binary has variable-length records: tile count (one byte), score (one 
 npm test
 ```
 
-Tests cover the shape catalogue and scores, dictionary integrity, a 17-point solution, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, crossing validation, connectivity and invalid inputs. Result validation independently reconstructs the board and every word.
+Tests cover the shape catalogue and scores, dictionary integrity, 17-point solutions with zero, one and two blanks, blank sharing at crossings, insufficient blanks, two- and three-letter filtering, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, connectivity and invalid inputs. Result validation independently reconstructs the board and every word, including the exact physical tiles and blanks spent.

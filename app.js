@@ -20,7 +20,7 @@ function createWorker() {
       finish();
       renderResult(best);
       $('search-status').textContent = best.words.length
-        ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · all words checked against SOWPODS`
+        ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · SOWPODS with your word lists`
         : 'No valid word can be made with these letters. Try a different rack.';
       if (matchMedia('(max-width: 640px)').matches) {
         document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
@@ -82,21 +82,25 @@ function changeRack(next) {
 }
 
 function addLetter(letter) {
+  if (letter === '?' && rack.filter(ch => ch === '?').length >= 2) return;
   if (rack.length < 12) changeRack([...rack, letter]);
 }
 
 function renderInput() {
   $('rack').replaceChildren(...Array.from({ length: 12 }, (_, i) => {
     const tile = document.createElement('button');
-    tile.className = `rack-tile${rack[i] ? ' filled' : ''}`;
+    tile.className = `rack-tile${rack[i] ? ' filled' : ''}${rack[i] === '?' ? ' blank-rack-tile' : ''}`;
     tile.textContent = rack[i] || '+';
     tile.disabled = !rack[i];
-    tile.setAttribute('aria-label', rack[i] ? `Remove ${rack[i]}, tile ${i + 1}` : `Empty tile ${i + 1}`);
+    tile.setAttribute('aria-label', rack[i] ? `Remove ${rack[i] === '?' ? 'blank' : rack[i]}, tile ${i + 1}` : `Empty tile ${i + 1}`);
     tile.onclick = () => changeRack(rack.filter((_, n) => n !== i));
     return tile;
   }));
   $('letter-count').textContent = rack.length;
   for (const key of $('keyboard').children) key.disabled = rack.length === 12;
+  const blanks = rack.filter(ch => ch === '?').length;
+  $('blank').disabled = rack.length === 12 || blanks === 2;
+  $('blank-count').textContent = `${blanks} / 2 blanks used`;
   $('clear').disabled = rack.length === 0;
   $('solve').disabled = !busy && rack.length !== 12;
   $('solve-label').textContent = busy ? 'Stop search' : rack.length === 12 ? 'Find best arrangement' : `Choose ${12 - rack.length} ${rack.length === 11 ? 'more letter' : 'letters'}`;
@@ -139,14 +143,16 @@ function renderResult(result) {
   $('board').style.setProperty('--cols', cols);
   $('board').style.setProperty('--board-width', `${cols * 43 + (cols - 1) * 4}px`);
   const slots = getSlots(result.cells);
-  const longest = slots.find(slot => slot.length === result.longest) || [];
+  const longest = slots.find(slot => slot.length === result.longest && result.cells[slot[1]] - result.cells[slot[0]] === 1) || [];
+  const blankIndices = result.blankIndices || [];
   $('board').replaceChildren(...result.cells.map((p, i) => {
     const tile = document.createElement('span');
-    tile.className = `board-cell${longest.includes(i) ? ' longest' : ''}`;
+    const isBlank = blankIndices.includes(i);
+    tile.className = `board-cell${longest.includes(i) ? ' longest' : ''}${isBlank ? ' blank' : ''}`;
     tile.textContent = result.letters[i];
     tile.style.setProperty('--x', p % 16 + 1);
     tile.style.setProperty('--y', Math.floor(p / 16) + 1);
-    tile.setAttribute('aria-label', `${result.letters[i]}, row ${Math.floor(p / 16) + 1}, column ${p % 16 + 1}`);
+    tile.setAttribute('aria-label', `${result.letters[i]}${isBlank ? ' (blank tile)' : ''}, row ${Math.floor(p / 16) + 1}, column ${p % 16 + 1}`);
     return tile;
   }));
   $('board').setAttribute('aria-label', `Crossword using ${result.cells.length} tiles. Words: ${result.words.join(', ') || 'none'}.`);
@@ -165,7 +171,9 @@ function renderResult(result) {
     return chip;
   }));
   $('unused').hidden = !result.unused.length;
-  $('unused').textContent = `Unused tiles: ${result.unused.join(' · ')}`;
+  $('unused').textContent = `Unused tiles: ${result.unused.map(ch => ch === '?' ? '? (blank)' : ch).join(' · ')}`;
+  $('blank-note').hidden = !blankIndices.length;
+  $('blank-note').textContent = `Tiles marked ? are blanks: ${blankIndices.map(i => `? → ${result.letters[i]}`).join(', ')}.`;
 }
 
 for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
@@ -177,17 +185,19 @@ for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
   $('keyboard').append(button);
 }
 $('clear').onclick = () => changeRack([]);
+$('blank').onclick = () => addLetter('?');
 $('solve').onclick = () => busy ? stopSearch() : solve();
 $('example').onclick = () => changeRack([...'AEINORSTATED']);
 document.addEventListener('keydown', event => {
   if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
   if (/^[a-z]$/i.test(event.key)) { event.preventDefault(); addLetter(event.key.toUpperCase()); }
+  if (event.key === '?') { event.preventDefault(); addLetter('?'); }
   if (event.key === 'Backspace' && rack.length) { event.preventDefault(); changeRack(rack.slice(0, -1)); }
   if (event.key === 'Escape') stopSearch();
 });
 try {
   const saved = localStorage.getItem('scrabby-rack') || '';
-  if (/^[A-Z]{0,12}$/.test(saved)) rack = [...saved];
+  if (/^[A-Z?]{0,12}$/.test(saved) && [...saved].filter(ch => ch === '?').length <= 2) rack = [...saved];
 } catch { /* The app works without local storage. */ }
 renderInput();
 createWorker();
