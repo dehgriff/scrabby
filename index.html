@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="Twelve letters. Your best crossword. A private, on-device SOWPODS word game solver.">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css">
+  <title>Scrabby — make every letter count</title>
+</head>
+<body>
+  <div class="shell">
+    <header class="header">
+      <a class="brand" href="./" aria-label="Scrabby home"><span class="brand-tile">s<span>1</span></span>scrabby<span class="brand-dot">.</span></a>
+      <span class="device-label"><span class="status-dot"></span><span id="device-status">On-device solver</span></span>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div><p class="eyebrow">A LITTLE WORDPLAY. A LOT OF POSSIBILITIES.</p><h1>Make every<br class="mobile-break"> letter count<span>.</span></h1></div>
+        <p class="intro-copy">Your twelve letters, in their best arrangement.<br>Powered by SOWPODS. Solved right here on your device.</p>
+      </section>
+
+      <div class="workspace">
+        <section class="input-panel panel" aria-labelledby="letters-title">
+          <div class="section-heading"><h2 id="letters-title"><span class="step">01</span> Your letters</h2><span class="counter"><strong id="letter-count">0</strong> / 12</span></div>
+          <p class="panel-copy">Tap your tiles. Repeated letters are welcome.</p>
+          <div class="rack" id="rack" aria-label="Your 12 letter tiles"></div>
+          <div class="rack-actions"><span>Tap a tile to remove it</span><button id="clear" class="text-button" disabled>Clear all <span aria-hidden="true">↺</span></button></div>
+          <div class="keyboard" id="keyboard" aria-label="Choose letters"></div>
+          <button class="solve-button" id="solve" disabled><span id="solve-label">Choose 12 letters</span><span id="solve-icon" aria-hidden="true">↗</span></button>
+          <div class="input-footer"><span id="input-hint">Solves automatically at 12 tiles</span><button id="example" class="text-button">Try an example</button></div>
+          <p class="error" id="error" role="alert" hidden></p>
+        </section>
+
+        <section class="result-panel panel" aria-labelledby="result-title" aria-busy="false">
+          <div class="section-heading"><h2 id="result-title"><span class="step">02</span> Your best arrangement</h2><span class="result-badge" id="result-badge">THE POSSIBILITIES AWAIT</span></div>
+          <div id="empty-state" class="empty-state">
+            <div class="tile-sketch" aria-hidden="true">
+              <span style="--r:1;--c:1">s</span><span style="--r:1;--c:2">o</span><span style="--r:1;--c:5">a</span><span style="--r:1;--c:6">h</span>
+              <span class="sketch-main" style="--r:2;--c:1">s</span><span class="sketch-main" style="--r:2;--c:2">c</span><span class="sketch-main" style="--r:2;--c:3">r</span><span class="sketch-main" style="--r:2;--c:4">a</span><span class="sketch-main" style="--r:2;--c:5">b</span><span class="sketch-main" style="--r:2;--c:6">s</span>
+              <span style="--r:3;--c:3">e</span><span style="--r:3;--c:4">d</span>
+            </div>
+            <h3>A good word is just the beginning.</h3>
+            <p>Add your letters and we’ll find the best way<br>to bring them all together.</p>
+            <div class="empty-note"><span>12 tiles</span><span class="note-cross">×</span><span>one connected crossword</span></div>
+          </div>
+          <div id="solution" hidden>
+            <div class="solution-heading"><div><p class="eyebrow" id="solution-kicker">PROVEN OPTIMAL</p><h3 id="solution-title">Your letters, working together.</h3></div><div class="score-total"><strong id="score">17</strong><span>POINTS</span></div></div>
+            <div class="board-area"><div id="board" class="board" aria-label="Crossword solution"></div></div>
+            <div id="unused" class="unused" hidden></div>
+            <div class="score-breakdown"><div><strong id="longest-score">6</strong><span>Longest word</span></div><span>+</span><div><strong id="words-score">10</strong><span>Words made</span></div><span>+</span><div><strong id="bonus-score">1</strong><span>All 12 tiles</span></div></div>
+            <div class="word-list-heading"><h4>The words you made</h4><span>Tap to highlight</span></div><div id="words" class="words"></div>
+          </div>
+          <div id="search-status" class="search-status" role="status" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <details class="rules"><summary><span class="info-icon">i</span> A quick note on the rules <span class="details-plus" aria-hidden="true">+</span></summary><div class="rules-content"><p>Words read left to right and top to bottom. Every uninterrupted row or column of two or more letters must be in SOWPODS, and all used tiles must connect edge to edge.</p><p><strong>Your score = longest word length + number of words + 1 if all 12 tiles are used.</strong> A 17-point arrangement is the theoretical maximum. If your letters can’t make it, Scrabby searches for the highest possible score, including arrangements with unused tiles.</p><p>The solver checks every connected shape in score order. Difficult racks may take longer; you can stop and keep the best result found. The bundled list is the traditional 267,751-word SOWPODS list, rather than the latest Collins edition.</p></div></details>
+    </main>
+    <footer class="footer"><span>Small tiles. Big possibilities.</span><span>Made for the love of word games.</span></footer>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
