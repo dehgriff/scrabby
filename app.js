@@ -176,7 +176,7 @@ function renderResult(result) {
   $('blank-note').textContent = `Tiles marked ? are blanks: ${blankIndices.map(i => `? → ${result.letters[i]}`).join(', ')}.`;
 }
 
-for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
   const button = document.createElement('button');
   button.className = 'letter-key';
   button.textContent = letter;
