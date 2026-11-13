@@ -30,8 +30,8 @@
           <p class="panel-copy">Tap your tiles. Repeats and up to three blanks are welcome.</p>
           <div class="rack" id="rack" aria-label="Your 12 letter tiles"></div>
           <div class="rack-actions"><span>Tap a tile to remove it</span><button id="clear" class="text-button" disabled>Clear all <span aria-hidden="true">↺</span></button></div>
-          <div class="keyboard" id="keyboard" aria-label="Choose letters"></div>
-          <div class="blank-controls"><button id="blank" class="blank-key" aria-label="Add blank tile"><span aria-hidden="true">?</span> Blank tile</button><span id="blank-count">0 / 3 blanks used</span></div>
+          <div class="keyboard" id="keyboard" aria-label="Choose letters"><button id="blank" class="letter-key blank-key" aria-label="Add blank tile" title="Add blank tile"><span aria-hidden="true">?</span></button></div>
+          <div class="keyboard-options"><span id="blank-count">0 / 3 blanks used</span></div>
           <button class="solve-button" id="solve" disabled><span id="solve-label">Choose 12 letters</span><span id="solve-icon" aria-hidden="true">↗</span></button>
           <div class="input-footer"><span id="input-hint">Solves automatically at 12 tiles</span><button id="example" class="text-button">Try an example</button></div>
           <p class="error" id="error" role="alert" hidden></p>

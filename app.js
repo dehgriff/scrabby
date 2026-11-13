@@ -206,7 +206,7 @@ for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
   button.textContent = letter;
   button.setAttribute('aria-label', `Add ${letter}`);
   button.onclick = () => addLetter(letter);
-  $('keyboard').append(button);
+  $('keyboard').insertBefore(button, $('blank'));
 }
 $('clear').onclick = () => changeRack([]);
 $('blank').onclick = () => addLetter('?');

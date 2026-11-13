@@ -72,6 +72,21 @@ test('vertical longest word is transposed with crossings and blanks preserved', 
   assert.equal(slot.map(i => result.letters[i]).join(''), 'CAT');
 });
 
+test('TONG and TIP keep their spelling when the main word is transposed horizontally', () => {
+  const verticalShape = Uint8Array.from([6, 6, 0, 1, 2, 16, 32, 48]);
+  const rack = 'TONGIPZZZZZZ';
+  const result = solveRack(rack, ['TONG', 'TIP'], verticalShape);
+  validate(result, rack, new Set(['TONG', 'TIP']));
+  assert.equal(result.score, 6);
+  const slots = getSlots(result.cells);
+  const main = slots.find(slot => slot.length === 4);
+  const crossing = slots.find(slot => slot.length === 3);
+  assert.equal(main.map(i => result.letters[i]).join(''), 'TONG');
+  assert.equal(crossing.map(i => result.letters[i]).join(''), 'TIP');
+  assert.equal(result.cells[main[1]] - result.cells[main[0]], 1);
+  assert.equal(result.cells[crossing[1]] - result.cells[crossing[0]], 16);
+});
+
 test('full SOWPODS list is bundled, with short and long words', () => {
   assert.equal(dictionary.length, 267751);
   for (const word of ['AA', 'QI', 'ZA', 'DETENT', 'QUIZZICAL']) assert.ok(words.has(word));

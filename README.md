@@ -39,11 +39,11 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 ## Use
 
 - Tap letter buttons 12 times; repeats are supported. The search starts automatically.
-- Up to three of the 12 tiles can be blanks. Tap **? Blank tile**, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
+- Up to three of the 12 tiles can be blanks. Tap **?** at the right of the bottom QWERTY row, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
 - Tap a selected tile to remove it, or choose **Clear all**.
 - On a computer, type letters and use Backspace to remove the last tile.
 - Tap a result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
-- Tap **Reject “WORD” & try again** to exclude the main horizontal long word and solve the same rack again. Rejections accumulate for that rack and exclude those words everywhere in subsequent arrangements. The next result is optimal for the remaining allowed words. **Reset rejections** restores them and searches again; changing the rack also clears them. Rejections do not edit your word-list files and are cleared on page reload.
+- Tap **Reject “WORD” & try again** to exclude the highlighted main long word and solve the same rack again. Rejections accumulate for that rack and exclude those words everywhere in subsequent arrangements. The next result is optimal for the remaining allowed words. **Reset rejections** restores them and searches again; changing the rack also clears them. Rejections do not edit your word-list files and are cleared on page reload.
 - **Stop search** (or Escape) keeps the best arrangement found so far. It is explicitly labelled unproven. Search again to finish proving the optimum.
 - The last rack is saved in your browser, when local storage is available.
 
@@ -53,7 +53,7 @@ Words read left to right and downwards. Every maximal horizontal or vertical run
 
 Two- and three-letter words must also appear in their respective editable allowed lists below. Each of up to three blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
 
-A longest word always runs horizontally and is highlighted in the solution. When needed, the solver swaps rows and columns, preserving every word, blank and the optimal score. If several words tie for longest, a horizontal one is highlighted.
+A longest word always runs horizontally and is highlighted. The solver swaps rows and columns when needed, preserving every word, blank and the optimal score. If several words tie for longest, a horizontal one is highlighted.
 
 ```
 score = longest word length + number of word placements + (all 12 used ? 1 : 0)
