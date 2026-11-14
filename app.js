@@ -11,6 +11,7 @@ let commonWords = false;
 const rejectedWords = new Set();
 let started = 0;
 let timer;
+let scrollToResult = true;
 let progress = 'Searching the highest-scoring shapes';
 
 function createWorker() {
@@ -26,7 +27,7 @@ function createWorker() {
       $('search-status').textContent = best.words.length
         ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · ${commonWords ? 'common words + your short-word lists' : 'SOWPODS with your word lists'}`
         : commonWords ? 'No solution with the current common-word list and rejections. Try Use SOWPODS or Reset rejections.' : rejectedWords.size ? 'No valid words remain with these rejections. Reset rejections to try the full list again.' : 'No valid word can be made with these letters. Try a different rack.';
-      if (matchMedia('(max-width: 640px), (orientation: landscape) and (max-height: 600px)').matches) {
+      if (scrollToResult && matchMedia('(max-width: 640px), (orientation: landscape) and (max-height: 600px)').matches) {
         document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }
     }
@@ -54,6 +55,7 @@ function finish() {
 }
 
 function resetResult() {
+  document.querySelector('.result-panel').style.minHeight = '';
   best = null;
   mainWord = '';
   $('reject').disabled = true;
@@ -135,12 +137,18 @@ function rejectMainWord(useCommonWords = false) {
   rejectedWords.add(mainWord);
   if (useCommonWords) commonWords = true;
   renderRejections();
-  resetResult();
-  solve();
+  solve({ preserveView: true });
 }
 
-function solve() {
+function solve({ preserveView = false } = {}) {
   if (rack.length !== 12 || busy) return;
+  scrollToResult = !preserveView;
+  if (preserveView) {
+    // Keep the previous board and panel height while replacing this result.
+    // Collapsing it would clamp the page's scroll position on small screens.
+    const panel = document.querySelector('.result-panel');
+    panel.style.minHeight = `${panel.getBoundingClientRect().height}px`;
+  }
   if (!worker) createWorker();
   busy = true;
   started = performance.now();
@@ -228,15 +236,13 @@ $('reject-common').onclick = () => rejectMainWord(true);
 $('use-sowpods').onclick = () => {
   if (busy) return;
   commonWords = false;
-  resetResult();
-  solve();
+  solve({ preserveView: true });
 };
 $('reset-rejections').onclick = () => {
   if (busy) return;
   rejectedWords.clear();
   renderRejections();
-  resetResult();
-  solve();
+  solve({ preserveView: true });
 };
 $('example').onclick = () => changeRack(drawTiles());
 document.addEventListener('keydown', event => {
