@@ -34,6 +34,14 @@ export function getBoardBounds(tiles) {
   return { minX, maxX, minY, maxY };
 }
 
+// Scale cells and gaps together so the entire grid fits in both dimensions.
+export function getGridLayout(bounds, width, height) {
+  const columns = bounds.maxX - bounds.minX + 1;
+  const rows = bounds.maxY - bounds.minY + 1;
+  const scale = Math.max(0, Math.min(1, width / (columns * 44 + (columns - 1) * 3), height / (rows * 44 + (rows - 1) * 3)));
+  return { cell: 44 * scale, gap: 3 * scale };
+}
+
 export function analyzeArrangement(tiles) {
   const placed = tiles.filter(tile => tile.x !== null);
   const key = (x, y) => `${x},${y}`;

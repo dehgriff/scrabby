@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
-import { createTiles, moveTile, appendTile, getBoardBounds, analyzeArrangement, checkArrangement } from '../play-model.js';
+import { createTiles, moveTile, appendTile, getBoardBounds, getGridLayout, analyzeArrangement, checkArrangement } from '../play-model.js';
 import { prepareDictionary, prepareCommonDictionary } from '../dictionary.js';
 import { solveRack } from '../solver.js';
 
@@ -119,6 +119,19 @@ test('the grid has a minimum area and an empty border on every side, including n
     for (const [x, y] of coordinates) {
       assert.ok(x > bounds.minX && x < bounds.maxX);
       assert.ok(y > bounds.minY && y < bounds.maxY);
+    }
+  }
+});
+
+test('grid fitting keeps every cell visible across narrow, wide and tall arrangements', () => {
+  for (const [columns, rows] of [[7, 5], [14, 5], [7, 14], [25, 30], [50, 5]]) {
+    for (const [width, height] of [[240, 160], [283, 396], [700, 440], [480, 180]]) {
+      const { cell, gap } = getGridLayout({ minX: -3, maxX: columns - 4, minY: -5, maxY: rows - 6 }, width, height);
+      assert.ok(cell > 0 && cell <= 44);
+      assert.ok(gap > 0 && gap <= 3);
+      assert.ok(columns * cell + (columns - 1) * gap <= width + 1e-8);
+      assert.ok(rows * cell + (rows - 1) * gap <= height + 1e-8);
+      assert.ok(Math.abs(cell / gap - 44 / 3) < 1e-8);
     }
   }
 });

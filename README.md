@@ -65,14 +65,14 @@ The bag contains 78 letter tiles and four blanks. J, Q, X and Z are absent from 
 ## Play a crossword
 
 1. Choose **Play** after drawing or entering 12 letters. All tiles start in the off-board tray.
-2. Tap tray tiles in order to build a horizontal main word. Tapping a blank opens a QWERTY keyboard; choosing its letter appends it to the word.
+2. Tap tray tiles in order to build a horizontal main word. Tiles leave empty slots behind, so the remaining tray letters stay in place for quick tapping. Returning a tile fills its original gap. Tapping a blank opens a QWERTY keyboard; choosing its letter appends it to the word.
 3. Choose **Arrange tiles**, or start dragging, to finish quick word entry. Drag any tile from the tray or board onto an empty grid cell. Drag back to the tray to remove a board tile. Occupied cells cannot be overwritten.
 4. Alternatively, select a regular tile and tap an empty cell, or use **Return selected tile**. Focused board tiles can be moved with arrow keys or returned to the tray with Backspace/Delete. Tap a blank at any time to change its assigned letter; it can also be dragged like any other tile.
 5. The **potential score** updates after each placement or blank-letter change. It counts every horizontal and vertical word run, even if the spelling is invalid. The all-tiles bonus requires 12 connected board tiles. Word chips remain unchecked until requested.
 6. Choose **Check words** to validate the arrangement against SOWPODS and the configured two- and three-letter lists. Common-word mode and solver rejections do not affect play checks. Invalid words and their tiles turn red. Disconnected tiles and unset blanks also prevent a successful check. Starting another edit clears the previous check's highlighting.
 7. A valid check confirms the score. Keep arranging and check again to improve it, choose **Reset board** to return every tile to the tray and clear blank assignments, or choose **Solve this rack** to compare with the best possible arrangement.
 
-The board starts with at least seven columns and five rows, and grows to retain an empty cell on all sides of the current arrangement. Scroll the grid when it exceeds the available space; dragging near its edges scrolls it too. Unused tray tiles are permitted, but all board tiles must connect. The play arrangement is kept while comparing with the solver; changing the rack or reloading resets it. Only the rack is saved between visits.
+The board starts with at least seven columns and five rows, and grows to retain an empty cell on all sides of the current arrangement. The entire grid stays visible without internal scrolling: cells and letters shrink together as needed to fit the available width and board height, including after rotating the device. Unused tray tiles are permitted, but all board tiles must connect. The play arrangement is kept while comparing with the solver; changing the rack or reloading resets it. Only the rack is saved between visits.
 
 ## Rules and exactness
 

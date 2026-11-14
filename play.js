@@ -1,4 +1,4 @@
-import { createTiles, moveTile, appendTile, getBoardBounds, analyzeArrangement } from './play-model.js';
+import { createTiles, moveTile, appendTile, getBoardBounds, getGridLayout, analyzeArrangement } from './play-model.js';
 
 const $ = id => document.getElementById(id);
 
@@ -47,6 +47,9 @@ export class PlayBoard {
       event.preventDefault();
       [...$('blank-keyboard').children].find(key => key.textContent === event.key.toUpperCase())?.click();
     });
+    this.resizeObserver = new ResizeObserver(() => this.fitGrid());
+    this.resizeObserver.observe($('play-board-frame'));
+    window.addEventListener('resize', () => this.fitGrid());
     this.reset('');
   }
 
@@ -60,8 +63,6 @@ export class PlayBoard {
     $('play-content').hidden = this.tiles.length !== 12;
     $('play-empty').hidden = this.tiles.length === 12;
     this.render();
-    $('play-board-scroll').scrollLeft = 0;
-    $('play-board-scroll').scrollTop = 0;
   }
 
   edited() {
@@ -171,7 +172,6 @@ export class PlayBoard {
         document.body.append(ghost);
         drag.ghost = ghost;
         element.classList.add('drag-source');
-        this.autoScroll();
       }
       if (drag.ghost) {
         drag.ghost.style.left = `${drag.x}px`;
@@ -200,22 +200,21 @@ export class PlayBoard {
     target?.classList.add('drop-target');
   }
 
-  autoScroll() {
-    const drag = this.drag;
-    if (!drag?.moving) return;
-    const viewport = $('play-board-scroll');
-    const rect = viewport.getBoundingClientRect();
-    if (drag.y >= rect.top && drag.y <= rect.bottom && drag.x >= rect.left && drag.x <= rect.right) {
-      const dx = drag.x < rect.left + 30 ? -6 : drag.x > rect.right - 30 ? 6 : 0;
-      const dy = drag.y < rect.top + 30 ? -6 : drag.y > rect.bottom - 30 ? 6 : 0;
-      viewport.scrollBy(dx, dy);
-      this.showDropTarget(drag.x, drag.y);
-    }
-    this.dragFrame = requestAnimationFrame(() => this.autoScroll());
+  fitGrid() {
+    const frame = $('play-board-frame');
+    if (!this.bounds || !frame.clientWidth) return;
+    const style = getComputedStyle(frame);
+    const width = frame.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const height = Math.min(440, Math.max(160, window.innerHeight * 0.6));
+    const { cell, gap } = getGridLayout(this.bounds, width, height);
+    const grid = $('play-grid');
+    grid.style.setProperty('--play-cell', `${cell}px`);
+    grid.style.setProperty('--play-gap', `${gap}px`);
+    grid.style.setProperty('--play-font', `${Math.min(22, cell * 0.5)}px`);
+    grid.style.setProperty('--play-border', `${Math.min(1, cell / 20)}px`);
   }
 
   cancelDrag() {
-    cancelAnimationFrame(this.dragFrame);
     const drag = this.drag;
     this.drag = null;
     if (!drag) return;
@@ -228,13 +227,17 @@ export class PlayBoard {
   render() {
     const analysis = analyzeArrangement(this.tiles);
     const bounds = getBoardBounds(this.tiles);
+    this.bounds = bounds;
     const tray = $('play-tray');
-    tray.replaceChildren(...this.tiles.filter(tile => tile.x === null).map(tile => this.tileElement(tile)));
-    if (!tray.children.length) {
-      const note = document.createElement('span');
-      note.textContent = 'All tiles on board · drop here to return a tile';
-      tray.append(note);
-    }
+    // Every physical tile keeps its own slot, including when it is on the board.
+    // Returning a tile fills its original gap without moving its neighbours.
+    tray.replaceChildren(...this.tiles.map(tile => {
+      const slot = document.createElement('div');
+      slot.className = 'play-tray-slot';
+      if (tile.x === null) slot.append(this.tileElement(tile));
+      else slot.setAttribute('aria-hidden', 'true');
+      return slot;
+    }));
     const grid = $('play-grid');
     grid.style.setProperty('--play-cols', bounds.maxX - bounds.minX + 1);
     const cells = [];
@@ -257,6 +260,7 @@ export class PlayBoard {
       cells.push(cell);
     }
     grid.replaceChildren(...cells);
+    this.fitGrid();
     $('play-potential').textContent = analysis.score;
     $('play-breakdown').textContent = `${analysis.longest} longest + ${analysis.words.length} words + ${analysis.bonus} all-tiles bonus · ${analysis.used} / 12 tiles on board`;
     $('play-hint').textContent = this.building
