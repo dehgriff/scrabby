@@ -30,6 +30,7 @@ ES
 ET
 EX
 FA
+GI
 GO
 HA
 HE

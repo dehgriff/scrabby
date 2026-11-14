@@ -142,10 +142,10 @@ test('rack validation rejects wrong length, case and nonletters', () => {
   for (const rack of ['', 'ABC', 'ABCDEFGHIJKLM', 'abcdefghijkl', 'ABCDEFGHIJK!']) {
     assert.throws(() => solveRack(rack, dictionary, shapes), /12 letters/);
   }
-  assert.throws(() => solveRack('ABCDEFGH????', dictionary, shapes), /at most 3/);
+  assert.throws(() => solveRack('ABCDEFG?????', dictionary, shapes), /at most 4/);
 });
 
-for (const rack of ['AEINORSTATE?', 'AEINORSTAT??', 'AEINORSTA???']) {
+for (const rack of ['AEINORSTATE?', 'AEINORSTAT??', 'AEINORSTA???', 'AEINORST????']) {
   test(`${rack}: blanks make a valid 17-point optimum`, () => {
     const result = solveRack(rack, dictionary, shapes);
     validate(result, rack);

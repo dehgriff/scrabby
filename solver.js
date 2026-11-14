@@ -1,6 +1,6 @@
 // Exact search: all connected shapes, in descending score order. Transposition
 // preserves reading direction, so each shape and its transpose need only one entry.
-export const MAX_BLANKS = 3;
+export const MAX_BLANKS = 4;
 
 export function getSlots(cells) {
   const index = new Map(Array.from(cells, (p, i) => [p, i]));

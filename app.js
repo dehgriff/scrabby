@@ -1,4 +1,5 @@
 import { getSlots, MAX_BLANKS } from './solver.js';
+import { drawTiles } from './tile-bag.js';
 
 const $ = id => document.getElementById(id);
 let rack = [];
@@ -219,7 +220,7 @@ $('reset-rejections').onclick = () => {
   resetResult();
   solve();
 };
-$('example').onclick = () => changeRack([...'AEINORSTATED']);
+$('example').onclick = () => changeRack(drawTiles());
 document.addEventListener('keydown', event => {
   if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
   if (/^[a-z]$/i.test(event.key)) { event.preventDefault(); addLetter(event.key.toUpperCase()); }

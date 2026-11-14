@@ -10,6 +10,7 @@ const files = [
   'index.html',
   'style.css',
   'app.js',
+  'tile-bag.js',
   'solver.js',
   'dictionary.js',
   'worker.js',

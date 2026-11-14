@@ -39,7 +39,7 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 ## Use
 
 - Tap letter buttons 12 times; repeats are supported. The search starts automatically.
-- Up to three of the 12 tiles can be blanks. Tap **?** at the right of the bottom QWERTY row, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
+- Up to four of the 12 tiles can be blanks. Tap **?** at the right of the bottom QWERTY row, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
 - Tap a selected tile to remove it, or choose **Clear all**.
 - On a computer, type letters and use Backspace to remove the last tile.
 - Tap a result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
@@ -47,11 +47,20 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 - **Stop search** (or Escape) keeps the best arrangement found so far. It is explicitly labelled unproven. Search again to finish proving the optimum.
 - The last rack is saved in your browser, when local storage is available.
 
+**Try an example** draws 12 random tiles without replacement from a fresh 82-tile bag using the physical counts you supplied. Each click draws a new rack and solves it. The counts live in `tile-bag.js`:
+
+```text
+A×7 B×2 C×2 D×3 E×10 F×2 G×2 H×2 I×7 K×1 L×3
+M×2 N×5 O×6 P×2 R×5 S×3 T×5 U×3 V×2 W×2 Y×2 Blank×4
+```
+
+The bag contains 78 letter tiles and four blanks. J, Q, X and Z are absent from the bag, but blanks can represent them. You can still enter any letter and up to four blanks manually.
+
 ## Rules and exactness
 
 Words read left to right and downwards. Every maximal horizontal or vertical run of two or more tiles must be in SOWPODS. All used tiles connect by edges. One-letter runs do not count as words. Unused letters are permitted, with the bonus awarded only when all 12 are used.
 
-Two- and three-letter words must also appear in their respective editable allowed lists below. Each of up to three blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
+Two- and three-letter words must also appear in their respective editable allowed lists below. Each of up to four blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
 
 A longest word always runs horizontally and is highlighted. The solver swaps rows and columns when needed, preserving every word, blank and the optimal score. If several words tie for longest, a horizontal one is highlighted.
 
@@ -102,4 +111,4 @@ The shape binary has variable-length records: tile count (one byte), score (one 
 npm test
 ```
 
-Tests cover the shape catalogue and scores, dictionary integrity, 17-point solutions with zero, one, two and three blanks, blank sharing at crossings, insufficient blanks, two- and three-letter filtering, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, connectivity and invalid inputs. Result validation independently reconstructs the board and every word, including the exact physical tiles and blanks spent.
+Tests cover the shape catalogue and scores, dictionary integrity, 17-point solutions with zero through four blanks, blank sharing at crossings, insufficient blanks, two- and three-letter filtering, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, connectivity and invalid inputs. Result validation independently reconstructs the board and every word, including the exact physical tiles and blanks spent.
