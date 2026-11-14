@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { solveRack, getSlots, scoreBoard } from '../solver.js';
-import { prepareDictionary } from '../dictionary.js';
+import { prepareDictionary, prepareCommonDictionary } from '../dictionary.js';
 
 const dictionary = gunzipSync(readFileSync(new URL('../data/sowpods.txt.gz', import.meta.url))).toString().trim().split('\n');
 const words = new Set(dictionary);
@@ -294,4 +294,23 @@ test('rejections match whole words, preserving longer words with the same prefix
   const result = solveRack(rack, ['CAT', 'CATS'], shapes, () => {}, ['CAT']);
   validate(result, rack, new Set(['CATS']));
   assert.deepEqual(result.words, ['CATS']);
+});
+
+test('rejecting a main word and using common mode returns an optimal, valid alternative', () => {
+  const text = readFileSync(new URL('../data/common-words.txt', import.meta.url), 'utf8');
+  const common = prepareCommonDictionary(dictionary, text);
+  const commonWords = new Set(common);
+  for (const rack of ['AEINORSTATED', 'AEINORST????']) {
+    const original = solveRack(rack, dictionary, shapes);
+    const rejected = mainWord(original);
+    const updates = [];
+    const result = solveRack(rack, common, shapes, update => updates.push(update), [rejected]);
+    validate(result, rack, commonWords);
+    assert.ok(result.words.length);
+    assert.ok(!result.words.includes(rejected));
+    assert.ok(result.score <= original.score);
+    assert.equal(result.optimal, true);
+    for (const update of updates.filter(u => u.type === 'best')) validate(update.result, rack, commonWords);
+    assert.equal(mainWord(solveRack(rack, dictionary, shapes)), rejected, 'Switching modes must not mutate SOWPODS');
+  }
 });

@@ -7,6 +7,7 @@ let worker;
 let busy = false;
 let best = null;
 let mainWord = '';
+let commonWords = false;
 const rejectedWords = new Set();
 let started = 0;
 let timer;
@@ -23,8 +24,8 @@ function createWorker() {
       finish();
       renderResult(best);
       $('search-status').textContent = best.words.length
-        ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · SOWPODS with your word lists`
-        : rejectedWords.size ? 'No valid words remain with these rejections. Reset rejections to try the full list again.' : 'No valid word can be made with these letters. Try a different rack.';
+        ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · ${commonWords ? 'common words + your short-word lists' : 'SOWPODS with your word lists'}`
+        : commonWords ? 'No solution with the current common-word list and rejections. Try Use SOWPODS or Reset rejections.' : rejectedWords.size ? 'No valid words remain with these rejections. Reset rejections to try the full list again.' : 'No valid word can be made with these letters. Try a different rack.';
       if (matchMedia('(max-width: 640px), (orientation: landscape) and (max-height: 600px)').matches) {
         document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }
@@ -56,6 +57,7 @@ function resetResult() {
   best = null;
   mainWord = '';
   $('reject').disabled = true;
+  $('reject-common').disabled = true;
   $('solution').hidden = true;
   $('empty-state').hidden = false;
   $('result-badge').textContent = 'THE POSSIBILITIES AWAIT';
@@ -80,6 +82,7 @@ function persist() {
 function changeRack(next) {
   if (busy) stopSearch();
   rack = next;
+  commonWords = false;
   rejectedWords.clear();
   renderRejections();
   persist();
@@ -114,6 +117,11 @@ function renderInput() {
   $('solve-icon').textContent = busy ? '□' : '↗';
   $('input-hint').textContent = busy ? 'Working entirely on your device' : 'Solves automatically at 12 tiles';
   $('reject').disabled = busy || !best || !mainWord;
+  $('reject-common').disabled = busy || !best || !mainWord;
+  $('reject-common').hidden = commonWords;
+  $('dictionary-label').textContent = commonWords ? 'Common words (4+ letters)' : 'SOWPODS';
+  $('use-sowpods').hidden = !commonWords;
+  $('use-sowpods').disabled = busy;
   $('reset-rejections').disabled = busy || !rejectedWords.size;
 }
 
@@ -122,9 +130,10 @@ function renderRejections() {
   $('rejected-words').textContent = `Rejected for this rack: ${[...rejectedWords].join(', ')}`;
 }
 
-function rejectMainWord() {
+function rejectMainWord(useCommonWords = false) {
   if (busy || !best || !mainWord) return;
   rejectedWords.add(mainWord);
+  if (useCommonWords) commonWords = true;
   renderRejections();
   resetResult();
   solve();
@@ -147,7 +156,7 @@ function solve() {
     $('search-status').textContent = `${progress} · ${Math.floor((performance.now() - started) / 1000)}s`;
   }, 500);
   renderInput();
-  worker.postMessage({ rack: rack.join(''), rejectedWords: [...rejectedWords] });
+  worker.postMessage({ rack: rack.join(''), rejectedWords: [...rejectedWords], commonWords });
 }
 
 function renderResult(result) {
@@ -167,8 +176,10 @@ function renderResult(result) {
   const slots = getSlots(result.cells);
   const longest = slots.find(slot => slot.length === result.longest && result.cells[slot[1]] - result.cells[slot[0]] === 1) || [];
   mainWord = longest.map(i => result.letters[i]).join('');
-  $('reject').textContent = mainWord ? `Reject “${mainWord}” & try again` : 'Reject long word & try again';
+  $('reject').title = mainWord ? `Reject “${mainWord}” and find another solution` : 'Reject the highlighted main word';
   $('reject').disabled = busy || !mainWord;
+  $('reject-common').title = mainWord ? `Reject “${mainWord}” and use common words of four or more letters` : 'Reject the highlighted word and use common words';
+  $('reject-common').disabled = busy || !mainWord;
   const blankIndices = result.blankIndices || [];
   $('board').replaceChildren(...result.cells.map((p, i) => {
     const tile = document.createElement('span');
@@ -212,7 +223,14 @@ for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
 $('clear').onclick = () => changeRack([]);
 $('blank').onclick = () => addLetter('?');
 $('solve').onclick = () => busy ? stopSearch() : solve();
-$('reject').onclick = rejectMainWord;
+$('reject').onclick = () => rejectMainWord();
+$('reject-common').onclick = () => rejectMainWord(true);
+$('use-sowpods').onclick = () => {
+  if (busy) return;
+  commonWords = false;
+  resetResult();
+  solve();
+};
 $('reset-rejections').onclick = () => {
   if (busy) return;
   rejectedWords.clear();

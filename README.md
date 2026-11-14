@@ -43,7 +43,8 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 - Tap a selected tile to remove it, or choose **Clear all**.
 - On a computer, type letters and use Backspace to remove the last tile.
 - Tap a result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
-- Tap **Reject “WORD” & try again** to exclude the highlighted main long word and solve the same rack again. Rejections accumulate for that rack and exclude those words everywhere in subsequent arrangements. The next result is optimal for the remaining allowed words. **Reset rejections** restores them and searches again; changing the rack also clears them. Rejections do not edit your word-list files and are cleared on page reload.
+- Tap **Reject word** to exclude the highlighted main long word and solve the same rack again. Rejections accumulate for that rack and exclude those words everywhere in subsequent arrangements. The next result is optimal for the remaining allowed words. **Reset rejections** restores them and searches again; changing the rack also clears them. Rejections do not edit your word-list files and are cleared on page reload.
+- **Reject + use common words** also switches to the common-word list for all words of four letters or more, keeping your two- and three-letter lists unchanged. The dictionary label shows which mode is active. Further rejections stay in common mode. **Use SOWPODS** switches back, retaining rejections; **Reset rejections** only resets exclusions. Each new rack (including an example) and page reload defaults to SOWPODS.
 - **Stop search** (or Escape) keeps the best arrangement found so far. It is explicitly labelled unproven. Search again to finish proving the optimum.
 - The last rack is saved in your browser, when local storage is available.
 
@@ -93,6 +94,16 @@ Keep both word-list files in Git alongside the other source files. Restore a rem
 ## Dictionary and data
 
 The bundled traditional **267,751-word SOWPODS** list is from [Jessica McKellar’s Scrabble project](https://github.com/jesstess/Scrabble/blob/master/scrabble/sowpods.txt), downloaded 12 November 2026. It is not a claim to use the latest Collins tournament edition. SOWPODS contains obscure, archaic and potentially offensive entries. Dictionary rights remain with their respective owners; review the source and applicable rights before redistributing commercially.
+
+The optional common-word list, **`data/common-words.txt`**, contains **12,204 SOWPODS words of 4–12 letters** with English Zipf frequency >= 3.5 in **wordfreq 3.1.1** by Robyn Speer. That threshold corresponds to roughly 3 occurrences per million words. [wordfreq](https://github.com/rspeer/wordfreq) combines books, news, subtitles and other usage sources; its data reflects usage through about 2021. The SOWPODS intersection ensures that every common-mode word is still game-valid. Frequency is a proxy for familiarity: it removes entries such as DETENT, INHERE and RIBIER, while keeping FRIEND, GARDEN and LETTER, but it can omit familiar low-frequency words and retain some specialist terms.
+
+The frequency-derived selection is distributed under **CC BY-SA 4.0**, with source credits and modifications in `data/common-words-info.txt`, upstream attribution in `data/wordfreq-NOTICE.md`, and the license in `data/wordfreq-data-LICENSE.txt`. Those files are included in deployments. Your two- and three-letter choices are preserved in both dictionary modes. The displayed optimum is always for the active dictionary and current rejections; switching to common words may reduce the best achievable score.
+
+The common list is bundled, so the app and Cloudflare build still need no Python or npm packages. To regenerate it during development, install `wordfreq==3.1.1` in a Python environment, then run:
+
+```sh
+python3 scripts/generate-common-words.py
+```
 
 `data/sowpods.txt` is the readable list; the browser loads `data/sowpods.txt.gz`. `data/shapes.bin.gz` is the generated shape catalogue. Initial compressed solver data is about 1.6 MB. No letters are sent to a remote solver.
 

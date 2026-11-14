@@ -18,3 +18,18 @@ export function prepareDictionary(sowpodsText, twoLetterText, threeLetterText) {
   }
   return words.filter(word => (word.length !== 2 && word.length !== 3) || allowed.has(word));
 }
+
+// Apply this after the user's short-word lists, so those choices remain intact.
+export function prepareCommonDictionary(dictionary, commonText) {
+  const sowpods = new Set(dictionary);
+  const common = new Set();
+  for (const [i, line] of commonText.split(/\r?\n/).entries()) {
+    const word = line.replace(/#.*$/, '').trim().toUpperCase();
+    if (!word) continue;
+    if (!/^[A-Z]{4,12}$/.test(word) || !sowpods.has(word)) {
+      throw new Error(`Invalid SOWPODS word in common-words.txt, line ${i + 1}: ${word}`);
+    }
+    common.add(word);
+  }
+  return dictionary.filter(word => word.length <= 3 || common.has(word));
+}

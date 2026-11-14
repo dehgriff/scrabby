@@ -1,5 +1,5 @@
 import { solveRack } from './solver.js';
-import { prepareDictionary } from './dictionary.js';
+import { prepareDictionary, prepareCommonDictionary } from './dictionary.js';
 
 async function loadText(path) {
   const response = await fetch(new URL(path, import.meta.url), { cache: 'no-cache' });
@@ -20,13 +20,18 @@ const ready = Promise.all([
   unpack('./data/shapes.bin.gz'),
   loadText('./data/two-letter-words.txt'),
   loadText('./data/three-letter-words.txt'),
-]).then(([text, shapes, pairs, triples]) => [prepareDictionary(text, pairs, triples), shapes]);
+  loadText('./data/common-words.txt'),
+]).then(([text, shapes, pairs, triples, commonText]) => {
+  const dictionary = prepareDictionary(text, pairs, triples);
+  return { dictionary, commonDictionary: prepareCommonDictionary(dictionary, commonText), shapes };
+});
 ready.then(() => postMessage({ type: 'ready' })).catch(error => postMessage({ type: 'error', message: error.message }));
 
 self.onmessage = async ({ data }) => {
   try {
-    const [dictionary, shapes] = await ready;
-    const result = solveRack(data.rack, dictionary, shapes, update => postMessage(update), data.rejectedWords || []);
+    const { dictionary, commonDictionary, shapes } = await ready;
+    const selectedDictionary = data.commonWords ? commonDictionary : dictionary;
+    const result = solveRack(data.rack, selectedDictionary, shapes, update => postMessage(update), data.rejectedWords || []);
     postMessage({ type: 'result', result });
   } catch (error) {
     postMessage({ type: 'error', message: error.message });

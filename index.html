@@ -39,6 +39,7 @@
 
         <section class="result-panel panel" aria-labelledby="result-title" aria-busy="false">
           <div class="section-heading"><h2 id="result-title"><span class="step">02</span> Your best arrangement</h2><span class="result-badge" id="result-badge">THE POSSIBILITIES AWAIT</span></div>
+          <div class="dictionary-mode"><span>Dictionary: <strong id="dictionary-label">SOWPODS</strong></span><button id="use-sowpods" class="text-button" hidden>Use SOWPODS</button></div>
           <div id="empty-state" class="empty-state">
             <div class="tile-sketch" aria-hidden="true">
               <span style="--r:1;--c:1">s</span><span style="--r:1;--c:2">o</span><span style="--r:1;--c:5">a</span><span style="--r:1;--c:6">h</span>
@@ -51,7 +52,7 @@
           </div>
           <div id="solution" hidden>
             <div class="solution-heading"><div><p class="eyebrow" id="solution-kicker">PROVEN OPTIMAL</p><h3 id="solution-title">Your letters, working together.</h3></div><div class="score-total"><strong id="score">17</strong><span>POINTS</span></div></div>
-            <div class="solution-actions"><button id="reject" class="reject-button" disabled>Reject long word &amp; try again</button></div>
+            <div class="solution-actions"><button id="reject" class="reject-button" disabled>Reject word</button><button id="reject-common" class="reject-button" disabled>Reject + use common words</button></div>
             <div class="board-area"><div id="board" class="board" aria-label="Crossword solution"></div></div>
             <p id="blank-note" class="blank-note" hidden></p>
             <div id="unused" class="unused" hidden></div>
@@ -63,7 +64,7 @@
         </section>
       </div>
 
-      <details class="rules"><summary><span class="info-icon">i</span> A quick note on the rules <span class="details-plus" aria-hidden="true">+</span></summary><div class="rules-content"><p>Words read left to right and top to bottom. Every uninterrupted row or column of two or more letters must be in SOWPODS. Two- and three-letter words must also be in their respective allowed lists, and all used tiles must connect edge to edge.</p><p><strong>Your score = longest word length + number of words + 1 if all 12 tiles are used.</strong> A 17-point arrangement is the theoretical maximum. If your letters can’t make it, Scrabby searches for the highest possible score, including arrangements with unused tiles.</p><p>The solver checks every connected shape in score order. Difficult racks may take longer; you can stop and keep the best result found. Up to four of your 12 tiles can be blanks, each representing any letter. They count towards word length and the all-tiles bonus. Tiles marked ? in the solution show their chosen letters. The bundled list is the traditional 267,751-word SOWPODS list, rather than the latest Collins edition.</p></div></details>
+      <details class="rules"><summary><span class="info-icon">i</span> A quick note on the rules <span class="details-plus" aria-hidden="true">+</span></summary><div class="rules-content"><p>Words read left to right and top to bottom. Every uninterrupted row or column of two or more letters must be in SOWPODS. Two- and three-letter words must also be in their respective allowed lists, and all used tiles must connect edge to edge.</p><p><strong>Your score = longest word length + number of words + 1 if all 12 tiles are used.</strong> A 17-point arrangement is the theoretical maximum. If your letters can’t make it, Scrabby searches for the highest possible score, including arrangements with unused tiles.</p><p>Use Reject + use common words to filter words of four or more letters by frequency, keeping your short-word lists. Each new rack defaults to SOWPODS. The solver checks every connected shape in score order. Difficult racks may take longer; you can stop and keep the best result found. Up to four of your 12 tiles can be blanks, each representing any letter. They count towards word length and the all-tiles bonus. Tiles marked ? in the solution show their chosen letters. The bundled list is the traditional 267,751-word SOWPODS list, rather than the latest Collins edition.</p></div></details>
     </main>
     <footer class="footer"><span>Small tiles. Big possibilities.</span><span>Made for the love of word games.</span></footer>
   </div>

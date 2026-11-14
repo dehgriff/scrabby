@@ -1,0 +1,31 @@
+Scrabby common-word selection
+
+Generated 14 November 2026 using wordfreq 3.1.1 by Robyn Speer.
+Source: https://github.com/rspeer/wordfreq
+Frequency data: https://pypi.org/project/wordfreq/3.1.1/
+
+Selection and modifications:
+- English Zipf frequency >= 3.5 (approximately 3.16 occurrences per million).
+- ASCII words of 4 to 12 letters, intersected with Scrabby's bundled SOWPODS.
+- Uppercased, deduplicated and sorted; no frequency scores included.
+- 12,204 entries at generation time.
+
+This frequency-derived selection is shared under Creative Commons
+Attribution-ShareAlike 4.0 International:
+https://creativecommons.org/licenses/by-sa/4.0/
+See wordfreq-data-LICENSE.txt and wordfreq-NOTICE.md in this directory.
+The underlying SOWPODS lexicon retains its separate provenance and rights,
+as described in Scrabby's README.md.
+
+Attribution includes Robyn Speer, Google Books Ngram Viewer,
+Wikipedia contributors, the Leeds Internet Corpus, ParaCrawl,
+OpenSubtitles/OPUS, and SUBTLEX authors Marc Brysbaert et al.
+SUBTLEX is freely available data; see the accompanying wordfreq notice.
+
+Frequency is a practical proxy for familiarity, not a guarantee. Some familiar
+low-frequency words are excluded; some specialist words may still be included.
+This is a language-usage snapshot through about 2021, not a live frequency feed.
+
+The app retains the user's two- and three-letter lists unchanged in common mode.
+Regenerate with scripts/generate-common-words.py. No wordfreq installation is
+needed to run or deploy the app.
