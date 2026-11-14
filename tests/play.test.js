@@ -146,6 +146,11 @@ test('play checks SOWPODS and the editable short lists without applying the comm
   const restricted = prepareDictionary('AT QI CAT DETENT', 'AT', 'CAT');
   assert.equal(checkArrangement(arrange('QI', [[0, 0], [1, 0]]), new Set(restricted)).valid, false);
   assert.equal(checkArrangement(arrange('AT', [[0, 0], [1, 0]]), new Set(restricted)).valid, true);
+  const custom = new Set(prepareDictionary('AT\nCAT\n', 'IE', 'XYZ'));
+  assert.equal(checkArrangement(arrange('IE', [[0, 0], [1, 0]]), custom).valid, true);
+  assert.equal(checkArrangement(arrange('XYZ', [[0, 0], [1, 0], [2, 0]]), custom).valid, true);
+  assert.equal(checkArrangement(arrange('AT', [[0, 0], [1, 0]]), custom).valid, false);
+  assert.equal(checkArrangement(arrange('CAT', [[0, 0], [1, 0], [2, 0]]), custom).valid, false);
 });
 
 test('play independently reproduces solver scores and valid physical blank assignments', () => {

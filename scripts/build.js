@@ -32,7 +32,7 @@ const files = [
 
 // Check every input before replacing the previous generated output.
 const contents = await Promise.all(files.map(file => readFile(path.join(root, file))));
-// Fail before publishing a typo or a non-SOWPODS entry in either editable list.
+// Validate spelling format and length; short-word lists can extend SOWPODS.
 const dictionary = prepareDictionary(
   gunzipSync(contents[files.indexOf('data/sowpods.txt.gz')]).toString(),
   contents[files.indexOf('data/two-letter-words.txt')].toString(),

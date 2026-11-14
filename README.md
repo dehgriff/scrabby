@@ -76,9 +76,9 @@ The board starts with at least seven columns and five rows, and grows to retain 
 
 ## Rules and exactness
 
-Words read left to right and downwards. Every maximal horizontal or vertical run of two or more tiles must be in SOWPODS. All used tiles connect by edges. One-letter runs do not count as words. Unused letters are permitted, with the bonus awarded only when all 12 are used.
+Words read left to right and downwards. Every maximal horizontal or vertical run of two or more tiles must be in the active dictionary: SOWPODS for words of four or more letters, and the editable short-word lists for two- and three-letter words. All used tiles connect by edges. One-letter runs do not count as words. Unused letters are permitted, with the bonus awarded only when all 12 are used.
 
-Two- and three-letter words must also appear in their respective editable allowed lists below. Each of up to four blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
+The two- and three-letter lists override SOWPODS for their respective word lengths, allowing custom entries such as IE. Each of up to four blanks can stand for any letter; a blank at a crossing represents the same letter in both words and spends just one tile. The solver proves the optimum for your allowed word lists, including blank substitutions.
 
 A longest word always runs horizontally and is highlighted. The solver swaps rows and columns when needed, preserving every word, blank and the optimal score. If several words tie for longest, a horizontal one is highlighted.
 
@@ -99,9 +99,9 @@ Edit the appropriate file, with one allowed word per line:
 - **`data/two-letter-words.txt`** starts with all 124 two-letter SOWPODS words.
 - **`data/three-letter-words.txt`** starts with all 1,292 three-letter SOWPODS words.
 
-Delete any lines you do not want the solver to use. Blank lines and `#` comments are allowed. An empty list disables all words of that length. Each list only affects complete words of its own length: four-letter and longer words remain available, even if they contain a removed pair or triple.
+Add any two- or three-letter words you want to allow, even if absent from SOWPODS, or delete lines you do not want to use. These files are authoritative for their respective word lengths in the solver, common-word mode and play checks. For example, adding `IE` to `data/two-letter-words.txt` allows IE throughout the app. Entries must contain exactly two or three A–Z letters; lowercase is accepted and duplicates are ignored. Blank lines and `#` comments are allowed. An empty list disables all words of that length. Each list only affects complete words of its own length: four-letter and longer words remain available, even if they contain a removed pair or triple.
 
-You do **not** need to edit `data/sowpods.txt`, recompress the dictionary, or regenerate shapes for this. The app reads the allowed lists separately. Invalid or non-SOWPODS entries produce an error with the relevant filename and line number, including during a build.
+You do **not** need to edit `data/sowpods.txt`, recompress the dictionary, or regenerate shapes for this. The app reads the allowed lists separately. Entries with the wrong length or non-letter characters produce an error with the relevant filename and line number, including during a build; membership in SOWPODS is not required for short words.
 
 - **Locally:** save either list and reload the page to load it into a fresh solver.
 - **Cloudflare Pages:** commit and push the edited lists; your usual `npm run build` includes both in `dist/`. Reload the deployed app once the deployment finishes. The lists refresh when online and are cached for offline use.
@@ -112,7 +112,7 @@ Keep both word-list files in Git alongside the other source files. Restore a rem
 
 The bundled traditional **267,751-word SOWPODS** list is from [Jessica McKellar’s Scrabble project](https://github.com/jesstess/Scrabble/blob/master/scrabble/sowpods.txt), downloaded 12 November 2026. Credit goes to that project for providing the source file and to the original lexicon compilers. It is not the latest Collins tournament edition. SOWPODS contains obscure, archaic and potentially offensive entries.
 
-The source repository carries the **MIT License**, copyright 2012–2013 Jessica McKellar. Its notice is preserved in [data/sowpods-source-LICENSE.txt](data/sowpods-source-LICENSE.txt) and included in builds. This records the source repository's license; it does not establish a separate license from the original SOWPODS lexicon owners. The two- and three-letter allowed lists and the common-word list contain selections from that same lexicon.
+The source repository carries the **MIT License**, copyright 2012–2013 Jessica McKellar. Its notice is preserved in [data/sowpods-source-LICENSE.txt](data/sowpods-source-LICENSE.txt) and included in builds. This records the source repository's license; it does not establish a separate license from the original SOWPODS lexicon owners. The common-word list contains selections from that same lexicon. The two- and three-letter allowed lists are based on SOWPODS and may include custom additions.
 
 The optional common-word list, **`data/common-words.txt`**, contains **12,204 SOWPODS words of 4–12 letters** with English Zipf frequency >= 3.5 in **wordfreq 3.1.1** by Robyn Speer. That threshold corresponds to roughly 3 occurrences per million words. [wordfreq](https://github.com/rspeer/wordfreq) combines books, news, subtitles and other usage sources; its data reflects usage through about 2021. The SOWPODS intersection ensures that every common-mode word is still game-valid. Frequency is a proxy for familiarity: it removes entries such as DETENT, INHERE and RIBIER, while keeping FRIEND, GARDEN and LETTER, but it can omit familiar low-frequency words and retain some specialist terms.
 

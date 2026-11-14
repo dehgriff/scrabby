@@ -196,7 +196,8 @@ test('allowlist affects only two-letter words, not substrings of longer words', 
   const result = prepareDictionary('AA\nAB\nQI\nAARDVARK\nQIS\n', ' ab\r\n# my words\r\nAB\r\n', 'QIS\n');
   assert.deepEqual(result, ['AB', 'AARDVARK', 'QIS']);
   assert.deepEqual(prepareDictionary('AA\nQIS\n', '', 'QIS'), ['QIS']);
-  assert.throws(() => prepareDictionary('AA\n', 'ZZ', ''), /line 1/);
+  assert.deepEqual(prepareDictionary('AA\n', 'IE', ''), ['IE']);
+  assert.throws(() => prepareDictionary('AA\n', '1E', ''), /two-letter-words.txt, line 1/);
   assert.throws(() => prepareDictionary('AA\n', 'AA\nCAT', ''), /line 2/);
 });
 
@@ -212,7 +213,8 @@ test('three-letter list filters whole words independently, retaining longer word
   assert.deepEqual(prepareDictionary(text, 'AT', ' act\r\n# keep this one\r\nACT\r\n'), ['AT', 'ACT', 'CATS', 'SCAT']);
   assert.deepEqual(prepareDictionary(text, 'AT', ''), ['AT', 'CATS', 'SCAT']);
   assert.deepEqual(prepareDictionary(text, '', ''), ['CATS', 'SCAT']);
-  assert.throws(() => prepareDictionary(text, 'AT', 'XYZ'), /three-letter-words.txt, line 1/);
+  assert.deepEqual(prepareDictionary(text, 'AT', 'XYZ'), ['AT', 'CATS', 'SCAT', 'XYZ']);
+  assert.throws(() => prepareDictionary(text, 'AT', 'X-Z'), /three-letter-words.txt, line 1/);
   assert.throws(() => prepareDictionary(text, 'AT', 'CAT\nAT'), /three-letter-words.txt, line 2/);
 });
 
@@ -235,11 +237,26 @@ test('removing a three-letter word keeps longer words containing it, with blanks
   assert.equal(result.letters[result.blankIndices[0]], 'S');
 });
 
-test('checked-in editable lists contain only valid SOWPODS words', () => {
+test('checked-in editable lists contain correctly formatted entries and override SOWPODS', () => {
   const pairs = readFileSync(new URL('../data/two-letter-words.txt', import.meta.url), 'utf8');
   const triples = readFileSync(new URL('../data/three-letter-words.txt', import.meta.url), 'utf8');
   const filtered = prepareDictionary(dictionary.join('\n'), pairs, triples);
-  for (const word of filtered.filter(w => w.length <= 3)) assert.ok(words.has(word));
+  const expected = new Set([pairs, triples].flatMap(text => text.split(/\r?\n/).map(line => line.replace(/#.*$/, '').trim().toUpperCase()).filter(Boolean)));
+  assert.deepEqual(new Set(filtered.filter(w => w.length <= 3)), expected);
+});
+
+test('custom short words work in the solver, including blanks and common mode', () => {
+  const extended = prepareDictionary('TOWER\n', ' ie\r\n# custom word\r\nIE', 'xyz\nXYZ');
+  const common = prepareCommonDictionary(extended, 'TOWER');
+  for (const selected of [extended, common]) {
+    for (const [rack, word, score] of [['IEQQQQQQQQQQ', 'IE', 3], ['I?QQQQQQQQQQ', 'IE', 3], ['XYZQQQQQQQQQ', 'XYZ', 4]]) {
+      const result = solveRack(rack, selected, shapes);
+      validate(result, rack, new Set(selected));
+      assert.deepEqual(result.words, [word]);
+      assert.equal(result.score, score);
+      assert.equal(result.optimal, true);
+    }
+  }
 });
 
 function mainWord(result) {
