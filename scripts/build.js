@@ -10,6 +10,8 @@ const files = [
   'index.html',
   'style.css',
   'app.js',
+  'play.js',
+  'play-model.js',
   'tile-bag.js',
   'solver.js',
   'dictionary.js',

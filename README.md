@@ -1,6 +1,6 @@
 # Scrabby
 
-A dark-themed, mobile-friendly crossword word-game solver. Letter buttons become larger in landscape; on landscape phones the keyboard uses the full screen width. Tap 12 letters and get a **proven optimal arrangement**, using SOWPODS. Everything runs client side in JavaScript, with the search in a Web Worker to keep the interface responsive.
+A dark-themed, mobile-friendly crossword word game and solver. Draw 12 letters, build a crossword, and check it against SOWPODS—or reveal a **proven optimal arrangement**. Letter buttons become larger in landscape; on landscape phones the keyboard uses the full screen width. Everything runs client side in JavaScript, with dictionary checks and the solver in a Web Worker.
 
 Inspired by the discontinued **Scrabble Speed** game (also known as Scrabble Speed Tower). Scrabby is an independent project and is not affiliated with or endorsed by the game's publishers.
 
@@ -42,17 +42,18 @@ Cloudflare Pages supports both public and private Git repositories. Changing onl
 
 ## Use
 
-- Tap letter buttons 12 times; repeats are supported. The search starts automatically.
+- Choose **Draw 12 letters** for a random rack, or expand **Choose letters manually** and tap 12 letter buttons. Repeats are supported. Then choose **Play** or **Solve**; drawing or entering letters does not reveal a solution automatically.
 - Up to four of the 12 tiles can be blanks. Tap **?** at the right of the bottom QWERTY row, or type `?` on a computer. A blank represents any letter and counts normally towards word length and the all-12 bonus. Blank tiles in the solution have a dashed border and a small `?`; the note underneath gives their chosen letters.
 - Tap a selected tile to remove it, or choose **Clear all**.
 - On a computer, type letters and use Backspace to remove the last tile.
-- Tap a result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
+- The three sections are **Your letters**, **Your crossword**, and **Your best arrangement**. Play scrolls to the board; Solve reveals the solver's arrangement in the third section without changing the play board.
+- Tap a solver result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
 - Tap **Reject word** to exclude the highlighted main long word and solve the same rack again. Rejections accumulate for that rack and exclude those words everywhere in subsequent arrangements. The next result is optimal for the remaining allowed words. **Reset rejections** restores them and searches again; changing the rack also clears them. Rejections do not edit your word-list files and are cleared on page reload.
 - **Reject + use common words** also switches to the common-word list for all words of four letters or more, keeping your two- and three-letter lists unchanged. The dictionary label shows which mode is active. Further rejections stay in common mode. **Use SOWPODS** switches back, retaining rejections; **Reset rejections** only resets exclusions. Each new rack (including an example) and page reload defaults to SOWPODS.
 - **Stop search** (or Escape) keeps the best arrangement found so far. It is explicitly labelled unproven. Search again to finish proving the optimum.
 - The last rack is saved in your browser, when local storage is available.
 
-**Try an example** draws 12 random tiles without replacement from a fresh 82-tile bag using the configured Scrabble Speed Tower distribution. Each click draws a new rack and solves it. The counts live in `tile-bag.js`:
+**Draw 12 letters** draws without replacement from a fresh 82-tile bag using the configured Scrabble Speed Tower distribution. Each click starts a new rack and resets the play board and solver. The counts live in `tile-bag.js`:
 
 ```text
 A×7 B×2 C×2 D×3 E×10 F×2 G×2 H×2 I×7 K×1 L×3
@@ -60,6 +61,18 @@ M×2 N×5 O×6 P×2 R×5 S×3 T×5 U×3 V×2 W×2 Y×2 Blank×4
 ```
 
 The bag contains 78 letter tiles and four blanks. J, Q, X and Z are absent from the bag, but blanks can represent them. You can still enter any letter and up to four blanks manually.
+
+## Play a crossword
+
+1. Choose **Play** after drawing or entering 12 letters. All tiles start in the off-board tray.
+2. Tap tray tiles in order to build a horizontal main word. Tapping a blank opens a QWERTY keyboard; choosing its letter appends it to the word.
+3. Choose **Arrange tiles**, or start dragging, to finish quick word entry. Drag any tile from the tray or board onto an empty grid cell. Drag back to the tray to remove a board tile. Occupied cells cannot be overwritten.
+4. Alternatively, select a regular tile and tap an empty cell, or use **Return selected tile**. Focused board tiles can be moved with arrow keys or returned to the tray with Backspace/Delete. Tap a blank at any time to change its assigned letter; it can also be dragged like any other tile.
+5. The **potential score** updates after each placement or blank-letter change. It counts every horizontal and vertical word run, even if the spelling is invalid. The all-tiles bonus requires 12 connected board tiles. Word chips remain unchecked until requested.
+6. Choose **Check words** to validate the arrangement against SOWPODS and the configured two- and three-letter lists. Common-word mode and solver rejections do not affect play checks. Invalid words and their tiles turn red. Disconnected tiles and unset blanks also prevent a successful check. Starting another edit clears the previous check's highlighting.
+7. A valid check confirms the score. Keep arranging and check again to improve it, choose **Reset board** to return every tile to the tray and clear blank assignments, or choose **Solve this rack** to compare with the best possible arrangement.
+
+The board starts with at least seven columns and five rows, and grows to retain an empty cell on all sides of the current arrangement. Scroll the grid when it exceeds the available space; dragging near its edges scrolls it too. Unused tray tiles are permitted, but all board tiles must connect. The play arrangement is kept while comparing with the solver; changing the rack or reloading resets it. Only the rack is saved between visits.
 
 ## Rules and exactness
 
@@ -130,4 +143,4 @@ The shape binary has variable-length records: tile count (one byte), score (one 
 npm test
 ```
 
-Tests cover the shape catalogue and scores, dictionary integrity, 17-point solutions with zero through four blanks, blank sharing at crossings, insufficient blanks, two- and three-letter filtering, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, connectivity and invalid inputs. Result validation independently reconstructs the board and every word, including the exact physical tiles and blanks spent.
+Tests cover the shape catalogue and scores, dictionary integrity, 17-point solutions with zero through four blanks, blank sharing at crossings, insufficient blanks, two- and three-letter filtering, repeated-letter constraints, a lower optimum, unused tiles, no-word racks, connectivity and invalid inputs. Play-board tests cover quick entry, collision prevention, returning tiles, crossings, invalid-word highlighting, unset blanks, disconnected arrangements, expanding bounds and score agreement with solver results. Result validation independently reconstructs the board and every word, including the exact physical tiles and blanks spent.

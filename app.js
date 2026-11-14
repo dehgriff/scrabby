@@ -1,5 +1,6 @@
 import { getSlots, MAX_BLANKS } from './solver.js';
 import { drawTiles } from './tile-bag.js';
+import { PlayBoard } from './play.js';
 
 const $ = id => document.getElementById(id);
 let rack = [];
@@ -13,11 +14,18 @@ let started = 0;
 let timer;
 let scrollToResult = true;
 let progress = 'Searching the highest-scoring shapes';
+const playBoard = new PlayBoard((tiles, revision) => {
+  if (busy) stopSearch();
+  if (!worker) createWorker();
+  worker.postMessage({ type: 'check', tiles, revision });
+});
 
 function createWorker() {
   worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
   worker.onmessage = ({ data }) => {
     if (data.type === 'ready') $('device-status').textContent = 'SOWPODS ready';
+    if (data.type === 'checked') playBoard.showCheck(data.result, data.revision);
+    if (data.type === 'check-error') playBoard.showError(data.message, data.revision);
     if (data.type === 'best') { best = data.result; renderResult(best); }
     if (data.type === 'progress') progress = `Checking ${data.score}-point arrangements`;
     if (data.type === 'result') {
@@ -37,6 +45,7 @@ function createWorker() {
 }
 
 function fail(message) {
+  if (playBoard.checking) playBoard.showError(message, playBoard.revision);
   finish();
   $('error').textContent = message;
   $('error').hidden = false;
@@ -84,13 +93,13 @@ function persist() {
 function changeRack(next) {
   if (busy) stopSearch();
   rack = next;
+  playBoard.reset(rack.join(''));
   commonWords = false;
   rejectedWords.clear();
   renderRejections();
   persist();
   resetResult();
   renderInput();
-  if (rack.length === 12) solve();
 }
 
 function addLetter(letter) {
@@ -115,9 +124,12 @@ function renderInput() {
   $('blank-count').textContent = `${blanks} / ${MAX_BLANKS} blanks used`;
   $('clear').disabled = rack.length === 0;
   $('solve').disabled = !busy && rack.length !== 12;
-  $('solve-label').textContent = busy ? 'Stop search' : rack.length === 12 ? 'Find best arrangement' : `Choose ${12 - rack.length} ${rack.length === 11 ? 'more letter' : 'letters'}`;
+  $('solve-label').textContent = busy ? 'Stop search' : rack.length === 12 ? 'Solve' : `Choose ${12 - rack.length} ${rack.length === 11 ? 'more letter' : 'letters'}`;
   $('solve-icon').textContent = busy ? '□' : '↗';
-  $('input-hint').textContent = busy ? 'Working entirely on your device' : 'Solves automatically at 12 tiles';
+  $('input-hint').textContent = busy ? 'Working entirely on your device' : rack.length === 12 ? 'Play first, or reveal the best arrangement' : 'Draw 12 letters or choose your own';
+  $('play').disabled = rack.length !== 12;
+  $('play-solve').disabled = rack.length !== 12;
+  $('play-solve').textContent = busy ? 'Show solver' : 'Solve this rack';
   $('reject').disabled = busy || !best || !mainWord;
   $('reject-common').disabled = busy || !best || !mainWord;
   $('reject-common').hidden = commonWords;
@@ -230,7 +242,21 @@ for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
 }
 $('clear').onclick = () => changeRack([]);
 $('blank').onclick = () => addLetter('?');
-$('solve').onclick = () => busy ? stopSearch() : solve();
+$('solve').onclick = () => {
+  if (busy) stopSearch();
+  else {
+    solve();
+    document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
+  }
+};
+$('play').onclick = () => {
+  if (busy) stopSearch();
+  document.querySelector('.play-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
+};
+$('play-solve').onclick = () => {
+  if (!busy) solve();
+  document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
+};
 $('reject').onclick = () => rejectMainWord();
 $('reject-common').onclick = () => rejectMainWord(true);
 $('use-sowpods').onclick = () => {
@@ -246,6 +272,8 @@ $('reset-rejections').onclick = () => {
 };
 $('example').onclick = () => changeRack(drawTiles());
 document.addEventListener('keydown', event => {
+  if (event.defaultPrevented) return;
+  if ($('blank-dialog').open) return;
   if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
   if (/^[a-z]$/i.test(event.key)) { event.preventDefault(); addLetter(event.key.toUpperCase()); }
   if (event.key === '?') { event.preventDefault(); addLetter('?'); }
@@ -257,6 +285,6 @@ try {
   if (/^[A-Z?]{0,12}$/.test(saved) && [...saved].filter(ch => ch === '?').length <= MAX_BLANKS) rack = [...saved];
 } catch { /* The app works without local storage. */ }
 renderInput();
+playBoard.reset(rack.join(''));
 createWorker();
-if (rack.length === 12) solve();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => { /* Plain HTTP on a LAN does not support offline installation. */ });
