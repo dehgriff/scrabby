@@ -18,6 +18,7 @@ const files = [
   'icon.svg',
   'manifest.webmanifest',
   'data/sowpods.txt.gz',
+  'data/sowpods-source-LICENSE.txt',
   'data/shapes.bin.gz',
   'data/two-letter-words.txt',
   'data/three-letter-words.txt',

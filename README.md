@@ -2,20 +2,22 @@
 
 A dark-themed, mobile-friendly crossword word-game solver. Letter buttons become larger in landscape; on landscape phones the keyboard uses the full screen width. Tap 12 letters and get a **proven optimal arrangement**, using SOWPODS. Everything runs client side in JavaScript, with the search in a Web Worker to keep the interface responsive.
 
+Inspired by the discontinued **Scrabble Speed** game (also known as Scrabble Speed Tower). Scrabby is an independent project and is not affiliated with or endorsed by the game's publishers.
+
 ## Run
 
 Requires Node.js 18 or newer. No npm dependencies; local development needs no build step.
 
 ```sh
-cd ~/src/blue/scrabby
+cd scrabby
 npm start
 ```
 
-Open **http://localhost:5173** on your Mac. On your phone, connect to the same Wi-Fi and open the LAN URL printed by the server. Keep the Mac running; allow incoming connections if macOS asks. Use `PORT=8080 npm start` to change ports.
+Run these commands from the cloned repository. Open **http://localhost:5173** in a browser on the computer running the server. Set the `PORT` environment variable to change the default port of 5173.
 
 You can also serve these files from any static web host, including GitHub Pages. Serve over HTTP(S), not by opening `index.html` directly. The app has no server-side solver, accounts, API keys, analytics, or external runtime dependencies.
 
-On HTTPS or localhost, a service worker caches the app and data for offline use after the first complete load. A plain HTTP LAN address works for solving but cannot install an offline service worker. Use a current Safari, Chrome, Firefox or Edge (gzip `DecompressionStream` and module workers are required). On mobile, use the browser’s **Add to Home Screen** option for convenient access.
+On HTTPS or localhost, a service worker caches the app and data for offline use after the first complete load. Use a current Safari, Chrome, Firefox or Edge (gzip `DecompressionStream` and module workers are required). On mobile, open the deployed HTTPS site and use the browser’s **Add to Home Screen** option for convenient access.
 
 ## Build and deploy to Cloudflare Pages
 
@@ -36,6 +38,8 @@ For a [Cloudflare Pages Git integration](https://developers.cloudflare.com/pages
 
 Alternatively, build locally and upload the `dist` folder through Cloudflare Pages Direct Upload. Commit `scripts/build.js`, `package.json` and `.gitignore`; `dist/` is generated and ignored by Git. The hosted app runs entirely in the browser; no Pages Functions or backend configuration is needed.
 
+Cloudflare Pages supports both public and private Git repositories. Changing only the repository's visibility should not require changing the existing Pages project, build settings or custom domain. Keep the Cloudflare Git integration authorized for the repository.
+
 ## Use
 
 - Tap letter buttons 12 times; repeats are supported. The search starts automatically.
@@ -48,7 +52,7 @@ Alternatively, build locally and upload the `dist` folder through Cloudflare Pag
 - **Stop search** (or Escape) keeps the best arrangement found so far. It is explicitly labelled unproven. Search again to finish proving the optimum.
 - The last rack is saved in your browser, when local storage is available.
 
-**Try an example** draws 12 random tiles without replacement from a fresh 82-tile bag using the physical counts you supplied. Each click draws a new rack and solves it. The counts live in `tile-bag.js`:
+**Try an example** draws 12 random tiles without replacement from a fresh 82-tile bag using the configured Scrabble Speed Tower distribution. Each click draws a new rack and solves it. The counts live in `tile-bag.js`:
 
 ```text
 A×7 B×2 C×2 D×3 E×10 F×2 G×2 H×2 I×7 K×1 L×3
@@ -93,11 +97,15 @@ Keep both word-list files in Git alongside the other source files. Restore a rem
 
 ## Dictionary and data
 
-The bundled traditional **267,751-word SOWPODS** list is from [Jessica McKellar’s Scrabble project](https://github.com/jesstess/Scrabble/blob/master/scrabble/sowpods.txt), downloaded 12 November 2026. It is not a claim to use the latest Collins tournament edition. SOWPODS contains obscure, archaic and potentially offensive entries. Dictionary rights remain with their respective owners; review the source and applicable rights before redistributing commercially.
+The bundled traditional **267,751-word SOWPODS** list is from [Jessica McKellar’s Scrabble project](https://github.com/jesstess/Scrabble/blob/master/scrabble/sowpods.txt), downloaded 12 November 2026. Credit goes to that project for providing the source file and to the original lexicon compilers. It is not the latest Collins tournament edition. SOWPODS contains obscure, archaic and potentially offensive entries.
+
+The source repository carries the **MIT License**, copyright 2012–2013 Jessica McKellar. Its notice is preserved in [data/sowpods-source-LICENSE.txt](data/sowpods-source-LICENSE.txt) and included in builds. This records the source repository's license; it does not establish a separate license from the original SOWPODS lexicon owners. The two- and three-letter allowed lists and the common-word list contain selections from that same lexicon.
 
 The optional common-word list, **`data/common-words.txt`**, contains **12,204 SOWPODS words of 4–12 letters** with English Zipf frequency >= 3.5 in **wordfreq 3.1.1** by Robyn Speer. That threshold corresponds to roughly 3 occurrences per million words. [wordfreq](https://github.com/rspeer/wordfreq) combines books, news, subtitles and other usage sources; its data reflects usage through about 2021. The SOWPODS intersection ensures that every common-mode word is still game-valid. Frequency is a proxy for familiarity: it removes entries such as DETENT, INHERE and RIBIER, while keeping FRIEND, GARDEN and LETTER, but it can omit familiar low-frequency words and retain some specialist terms.
 
-The frequency-derived selection is distributed under **CC BY-SA 4.0**, with source credits and modifications in `data/common-words-info.txt`, upstream attribution in `data/wordfreq-NOTICE.md`, and the license in `data/wordfreq-data-LICENSE.txt`. Those files are included in deployments. Your two- and three-letter choices are preserved in both dictionary modes. The displayed optimum is always for the active dictionary and current rejections; switching to common words may reduce the best achievable score.
+The frequency-derived selection is distributed under **[Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/)**. Credit goes to **Robyn Speer** and the wordfreq data contributors, including Google Books Ngram Viewer, Wikipedia contributors, the Leeds Internet Corpus, ParaCrawl, OpenSubtitles/OPUS, and SUBTLEX authors Marc Brysbaert et al. The wordfreq software is Apache-2.0 licensed; Scrabby bundles the generated selection rather than the Python software.
+
+Source credits, selection criteria and modifications are recorded in [data/common-words-info.txt](data/common-words-info.txt), upstream attribution in [data/wordfreq-NOTICE.md](data/wordfreq-NOTICE.md), and the data license in [data/wordfreq-data-LICENSE.txt](data/wordfreq-data-LICENSE.txt). These notices are included in deployments. The common list retains the separate SOWPODS provenance described above. Two- and three-letter choices are preserved in both dictionary modes. The displayed optimum is always for the active dictionary and current rejections; switching to common words may reduce the best achievable score.
 
 The common list is bundled, so the app and Cloudflare build still need no Python or npm packages. To regenerate it during development, install `wordfreq==3.1.1` in a Python environment, then run:
 
