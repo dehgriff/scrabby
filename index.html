@@ -20,15 +20,15 @@
 
     <main>
       <section class="intro">
-        <div><p class="eyebrow">A LITTLE WORDPLAY. A LOT OF POSSIBILITIES.</p><h1>Make every<br class="mobile-break"> letter count<span>.</span></h1></div>
-        <p class="intro-copy">Twelve letters. How many words can you make?<br>Play your own crossword, or let Scrabby solve it.</p>
+        <div><p class="eyebrow">SPEED CROSSWORD GAME</p><h1>12 tiles, 60 seconds<span>.</span></h1></div>
+        <p class="intro-copy">Score = longest word + number of words + 1 if all tiles used.</p>
       </section>
 
       <div class="workspace">
         <section class="input-panel panel" aria-labelledby="letters-title">
-          <div class="section-heading"><h2 id="letters-title"><span class="step">01</span> Your letters</h2><span class="counter"><strong id="letter-count">0</strong> / 12</span></div>
-          <p class="panel-copy">Draw a rack to play, or choose your own letters. Repeats and up to four blanks are welcome.</p>
-          <button id="example" class="draw-button">Draw 12 letters <span aria-hidden="true">↻</span></button>
+          <div class="section-heading"><h2 id="letters-title"><span class="step">STEP 1</span> Draw your tiles</h2><span class="counter"><strong id="letter-count">0</strong> / 12</span></div>
+          <p class="panel-copy">Draw a rack at random, or choose your own letters. <strong>Then hit PLAY</strong>.</p>
+          <button id="example" class="draw-button">Draw 12 random tiles <span aria-hidden="true">↻</span></button>
           <div class="rack" id="rack" aria-label="Your 12 letter tiles"></div>
           <div class="rack-actions"><span>Tap a tile to remove it</span><button id="clear" class="text-button" disabled>Clear all <span aria-hidden="true">↺</span></button></div>
           <details class="manual-letters"><summary>Choose letters manually</summary>
@@ -41,7 +41,7 @@
         </section>
 
         <section class="play-panel panel" aria-labelledby="play-title">
-          <div class="section-heading"><h2 id="play-title"><span class="step">02</span> Your crossword</h2><span class="play-label">PLAY</span></div>
+          <div class="section-heading"><h2 id="play-title"><span class="step">STEP 2</span> Arrange your tiles in 60 secs</h2><span class="play-label">PLAY</span></div>
           <p id="play-empty" class="panel-copy">Choose 12 letters above, then tap Play to build your crossword.</p>
           <div id="play-content" hidden>
             <div class="play-score-heading"><div><p class="eyebrow">YOUR ARRANGEMENT</p><h3>Make it your own.</h3></div><div class="score-total"><strong id="play-potential">0</strong><span>POTENTIAL POINTS</span></div></div>
@@ -58,7 +58,7 @@
         </section>
 
         <section class="result-panel panel" aria-labelledby="result-title" aria-busy="false">
-          <div class="section-heading"><h2 id="result-title"><span class="step">03</span> Your best arrangement</h2><span class="result-badge" id="result-badge">THE POSSIBILITIES AWAIT</span></div>
+          <div class="section-heading"><h2 id="result-title"><span class="step">STEP 3</span> The best arrangement</h2><span class="result-badge" id="result-badge">THE POSSIBILITIES AWAIT</span></div>
           <div class="dictionary-mode"><span>Dictionary: <strong id="dictionary-label">SOWPODS</strong></span><button id="use-sowpods" class="text-button" hidden>Use SOWPODS</button></div>
           <div id="empty-state" class="empty-state">
             <div class="tile-sketch" aria-hidden="true">
