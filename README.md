@@ -60,7 +60,7 @@ A×7 B×2 C×2 D×3 E×10 F×2 G×2 H×2 I×7 K×1 L×3
 M×2 N×5 O×6 P×2 R×5 S×3 T×5 U×3 V×2 W×2 Y×2 Blank×4
 ```
 
-The bag contains 78 letter tiles and four blanks. J, Q, X and Z are absent from the bag, but blanks can represent them. You can still enter any letter and up to four blanks manually.
+The bag contains 78 letter tiles and four blanks. J, Q, X and Z are absent from the bag and disabled in the manual picker, including direct keyboard entry. Blanks can still represent them. You can enter the other letters and up to four blanks manually.
 
 ## Play a crossword
 

@@ -1,8 +1,9 @@
 import { getSlots, MAX_BLANKS } from './solver.js';
-import { drawTiles } from './tile-bag.js';
+import { drawTiles, TILE_COUNTS } from './tile-bag.js';
 import { PlayBoard } from './play.js';
 
 const $ = id => document.getElementById(id);
+const disabledManualLetters = new Set('QJZX');
 let rack = [];
 let worker;
 let busy = false;
@@ -111,6 +112,7 @@ function changeRack(next) {
 }
 
 function addLetter(letter) {
+  if (disabledManualLetters.has(letter)) return;
   if (letter === '?' && rack.filter(ch => ch === '?').length >= MAX_BLANKS) return;
   if (rack.length < 12) changeRack([...rack, letter]);
 }
@@ -126,7 +128,7 @@ function renderInput() {
     return tile;
   }));
   $('letter-count').textContent = rack.length;
-  for (const key of $('keyboard').children) key.disabled = rack.length === 12;
+  for (const key of $('keyboard').children) key.disabled = rack.length === 12 || disabledManualLetters.has(key.dataset.letter);
   const blanks = rack.filter(ch => ch === '?').length;
   $('blank').disabled = rack.length === 12 || blanks >= MAX_BLANKS;
   $('blank-count').textContent = `${blanks} / ${MAX_BLANKS} blanks used`;
@@ -247,6 +249,8 @@ for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
   const button = document.createElement('button');
   button.className = 'letter-key';
   button.textContent = letter;
+  button.dataset.letter = letter;
+  if (disabledManualLetters.has(letter)) button.title = 'Not in the tile bag; use a blank to represent this letter';
   button.setAttribute('aria-label', `Add ${letter}`);
   button.onclick = () => addLetter(letter);
   $('keyboard').insertBefore(button, $('blank'));
@@ -283,6 +287,7 @@ $('reset-rejections').onclick = () => {
   solve({ preserveView: true });
 };
 $('example').onclick = () => changeRack(drawTiles());
+$('bag-tiles').textContent = Object.entries(TILE_COUNTS).map(([letter, count]) => letter.repeat(count)).join(' ');
 document.addEventListener('keydown', event => {
   if (event.defaultPrevented) return;
   if ($('blank-dialog').open) return;
