@@ -51,6 +51,7 @@ MI
 MO
 MU
 MY
+NE
 NO
 OD
 OE
