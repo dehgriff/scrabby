@@ -21,7 +21,6 @@ export class PlayBoard {
       this.requestCheck();
     });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) this.roundTimer.tick(); });
-    $('arrange-tiles').onclick = () => { this.building = false; this.selected = null; this.render(); };
     $('play-reset').onclick = () => this.reset(this.tiles.map(tile => tile.tile).join(''), { preserveTimer: true });
     $('play-check').onclick = () => this.requestCheck();
     $('return-tile').onclick = () => { if (this.selected !== null) this.place(this.selected, null, null); };
@@ -314,10 +313,8 @@ export class PlayBoard {
     this.renderPoints(analysis.score);
     $('play-breakdown').textContent = `${analysis.longest} longest + ${analysis.words.length} words + ${analysis.bonus} all-tiles bonus · ${analysis.used} / 12 tiles on board`;
     $('play-hint').textContent = this.building
-      ? 'Tap tray tiles in word order to build your horizontal word. Then choose Arrange tiles, or start dragging.'
+      ? 'Tap tray tiles in word order to build your horizontal word. Then start dragging.'
       : 'Drag tiles to an empty cell or the tray. You can also select a tile, then tap an empty cell. Tap a blank to set its letter.';
-    $('arrange-tiles').hidden = !this.building;
-    $('arrange-tiles').disabled = !analysis.used;
     $('play-reset').disabled = !analysis.used && !this.tiles.some(tile => tile.tile === '?' && tile.letter);
     $('play-check').disabled = !analysis.used || this.checking;
     $('play-check').textContent = this.checking ? 'Checking…' : 'Check words';

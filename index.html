@@ -28,10 +28,10 @@
         <section class="input-panel panel" aria-labelledby="letters-title">
           <div class="section-heading"><h2 id="letters-title"><span class="step">STEP 1</span> Draw your tiles</h2><span class="counter"><strong id="letter-count">0</strong> / 12</span></div>
           <p class="panel-copy">Draw a rack at random, or choose your own letters. <strong>Then hit PLAY</strong>.</p>
-          <button id="example" class="draw-button">Draw 12 random tiles <span aria-hidden="true">↻</span></button>
+          <button id="example" class="draw-button">Draw 12 new tiles at random <span aria-hidden="true">↻</span></button>
           <div class="rack" id="rack" aria-label="Your 12 letter tiles"></div>
           <div class="rack-actions"><span>Tap a tile to remove it</span><button id="clear" class="text-button" disabled>Clear all <span aria-hidden="true">↺</span></button></div>
-          <details class="manual-letters"><summary>Choose letters manually</summary>
+          <details class="manual-letters"><summary>OR choose letters manually</summary>
             <div class="keyboard" id="keyboard" aria-label="Choose letters"><button id="blank" class="letter-key blank-key" aria-label="Add blank tile" title="Add blank tile"><span aria-hidden="true">?</span></button></div>
             <div class="keyboard-options"><span id="blank-count">0 / 4 blanks used</span></div>
           </details>
@@ -48,7 +48,7 @@
             <p id="play-hint" class="play-hint"></p>
             <div class="tray-heading"><span>Off-board tiles</span><button id="return-tile" class="text-button" hidden>Return selected tile</button></div>
             <div id="play-tray" class="play-tray" aria-label="Off-board tiles; drop here to return a tile"></div>
-            <div class="play-tools"><button id="arrange-tiles" class="reject-button">Arrange tiles</button><button id="play-reset" class="reject-button">Reset board</button><div class="play-metrics"><span id="play-timer" class="play-timer" role="timer" aria-live="off" aria-label="60 seconds remaining">60s</span><span id="play-points" class="play-points" aria-label="0 potential points"><strong id="play-potential">0</strong><span>Points</span></span></div></div>
+            <div class="play-tools"><button id="play-reset" class="reject-button">Reset board</button><div class="play-metrics"><span id="play-timer" class="play-timer" role="timer" aria-live="off" aria-label="60 seconds remaining">60s</span><span id="play-points" class="play-points" aria-label="0 potential points"><strong id="play-potential">0</strong><span>Points</span></span></div></div>
             <div id="play-board-frame" class="play-board-frame" aria-label="Crossword board"><div id="play-grid" class="play-grid" aria-label="Your crossword grid"></div></div>
             <div id="play-words" class="words play-words" aria-label="Words in your arrangement"></div>
             <div class="play-actions"><button id="play-check" class="solve-button">Check words</button><button id="play-solve" class="reject-button">Solve this rack</button></div>
