@@ -22,11 +22,7 @@ export class PlayBoard {
     });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) this.roundTimer.tick(); });
     $('arrange-tiles').onclick = () => { this.building = false; this.selected = null; this.render(); };
-    $('play-reset').onclick = () => {
-      const restartRound = this.roundStarted;
-      this.reset(this.tiles.map(tile => tile.tile).join(''));
-      if (restartRound) this.startRound();
-    };
+    $('play-reset').onclick = () => this.reset(this.tiles.map(tile => tile.tile).join(''), { preserveTimer: true });
     $('play-check').onclick = () => this.requestCheck();
     $('return-tile').onclick = () => { if (this.selected !== null) this.place(this.selected, null, null); };
     for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
@@ -67,10 +63,11 @@ export class PlayBoard {
     this.reset('');
   }
 
-  reset(rack) {
-    this.roundTimer.reset();
-    this.roundStarted = false;
-    this.timeExpired = false;
+  reset(rack, { preserveTimer = false } = {}) {
+    if (!preserveTimer) {
+      this.roundTimer.reset();
+      this.timeExpired = false;
+    }
     this.cancelDrag();
     if ($('blank-dialog').open) $('blank-dialog').close();
     this.tiles = createTiles(rack);
@@ -84,7 +81,6 @@ export class PlayBoard {
 
   startRound() {
     if (this.tiles.length !== 12) return;
-    this.roundStarted = true;
     this.timeExpired = false;
     this.roundTimer.start();
     this.render();

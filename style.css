@@ -1490,7 +1490,7 @@ h1>span {
 .play-metrics {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin-left: auto;
   flex-shrink: 0
 }
