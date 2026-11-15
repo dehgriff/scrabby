@@ -26,7 +26,10 @@ const ready = Promise.all([
   const dictionary = prepareDictionary(text, pairs, triples);
   return { dictionary, dictionarySet: new Set(dictionary), commonDictionary: prepareCommonDictionary(dictionary, commonText), shapes };
 });
-ready.then(() => postMessage({ type: 'ready' })).catch(error => postMessage({ type: 'error', message: error.message }));
+ready.then(({ dictionary }) => postMessage({
+  type: 'ready',
+  twoLetterWords: dictionary.filter(word => word.length === 2).sort(),
+})).catch(error => postMessage({ type: 'error', message: error.message }));
 
 self.onmessage = async ({ data }) => {
   try {

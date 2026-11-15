@@ -23,7 +23,10 @@ const playBoard = new PlayBoard((tiles, revision) => {
 function createWorker() {
   worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
   worker.onmessage = ({ data }) => {
-    if (data.type === 'ready') $('device-status').textContent = 'SOWPODS ready';
+    if (data.type === 'ready') {
+      $('device-status').textContent = 'SOWPODS ready';
+      $('allowed-two-words').textContent = data.twoLetterWords.join(' ') || 'No two-letter words are enabled.';
+    }
     if (data.type === 'checked') playBoard.showCheck(data.result, data.revision);
     if (data.type === 'check-error') playBoard.showError(data.message, data.revision);
     if (data.type === 'best') best = data.result;
@@ -45,6 +48,7 @@ function createWorker() {
 }
 
 function fail(message) {
+  if ($('allowed-two-words').textContent === 'Loading words…') $('allowed-two-words').textContent = 'Could not load the word list.';
   if (playBoard.checking) playBoard.showError(message, playBoard.revision);
   finish();
   if (best) renderResult(best);

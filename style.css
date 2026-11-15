@@ -1774,3 +1774,8 @@ h1>span {
     max-width: none
   }
 }
+
+.allowed-two-words {
+  word-spacing: .5em;
+  line-height: 2
+}
