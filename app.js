@@ -199,8 +199,6 @@ function renderResult(result) {
   $('longest-score').textContent = result.longest;
   $('words-score').textContent = result.words.length;
   $('bonus-score').textContent = result.bonus;
-  $('solution-kicker').textContent = result.optimal ? 'PROVEN OPTIMAL' : 'BEST FOUND SO FAR';
-  $('solution-title').textContent = result.score === 17 ? 'Twelve tiles. A perfect score.' : result.words.length ? 'Your letters, working together.' : 'These letters need a rethink.';
   $('result-badge').textContent = result.optimal ? '✓ OPTIMAL SOLUTION' : busy ? 'SEARCHING FOR MORE' : 'SEARCH STOPPED';
   $('result-badge').className = `result-badge${result.optimal ? ' optimal' : ''}`;
   const cols = Math.max(0, ...result.cells.map(p => p % 16)) + 1;

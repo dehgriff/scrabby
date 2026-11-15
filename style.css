@@ -464,30 +464,6 @@ h1>span {
   color: #a3aec0
 }
 
-.solution-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 28px 0 5px;
-  gap: 10px
-}
-
-.solution-heading .eyebrow {
-  font-size: 8px;
-  letter-spacing: 1.3px;
-  margin: 0 0 8px
-}
-
-.solution-heading h3 {
-  font-family: Georgia, serif;
-  font-weight: 400;
-  font-size: 22px;
-  letter-spacing: -.5px;
-  margin: 0;
-  max-width: 220px;
-  line-height: 1.2
-}
-
 .score-total {
   text-align: center;
   color: var(--purple);
@@ -839,10 +815,6 @@ h1>span {
     flex-wrap: wrap
   }
 
-  .solution-heading h3 {
-    font-size: 19px
-  }
-
   .score-total strong {
     font-size: 40px
   }
@@ -987,14 +959,6 @@ h1>span {
     margin-top: 27px
   }
 
-  .solution-heading {
-    padding-top: 25px
-  }
-
-  .solution-heading h3 {
-    font-size: 22px
-  }
-
   .board-area {
     min-height: 190px
   }
@@ -1125,10 +1089,25 @@ h1>span {
 }
 
 .solution-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  margin: 12px 0 0
+}
+
+.solution-rejects {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 12px 0 0
+  gap: 8px
+}
+
+.solution-actions .score-total {
+  min-width: 48px
+}
+
+.solution-actions .score-total strong {
+  font-size: 32px
 }
 
 .reject-button {
