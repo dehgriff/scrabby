@@ -1365,29 +1365,6 @@ h1>span {
   color: var(--green)
 }
 
-.play-score-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-top: 26px
-}
-
-.play-score-heading h3 {
-  font: 400 27px Georgia, serif;
-  margin: 0
-}
-
-.play-score-heading .eyebrow {
-  font-size: 9px;
-  margin-bottom: 8px
-}
-
-.play-score-heading .score-total span {
-  font-size: 8px;
-  letter-spacing: .8px
-}
-
 .play-breakdown {
   font-size: 11px;
   color: var(--muted);
@@ -1486,6 +1463,12 @@ h1>span {
   font-size: 9px
 }
 
+.play-tile.checked {
+  background: #2b3b2e;
+  border-color: #637d5d;
+  color: #d3e8c9
+}
+
 .play-tile.invalid {
   background: #5b2630;
   border-color: #ff929c;
@@ -1504,8 +1487,42 @@ h1>span {
   flex-shrink: 1
 }
 
-.play-timer {
+.play-metrics {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-left: auto;
+  flex-shrink: 0
+}
+
+.play-points {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--purple);
+  font-variant-numeric: tabular-nums;
+  line-height: 1
+}
+
+.play-points strong {
+  font-size: 35px;
+  font-weight: 650
+}
+
+.play-points > span {
+  font-size: 9px
+}
+
+.play-points.valid {
+  color: var(--green)
+}
+
+.play-points.invalid {
+  color: #ff929c
+}
+
+.play-timer {
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
   font-size: 21px;
@@ -1729,14 +1746,6 @@ h1>span {
     padding: 4px
   }
 
-  .play-score-heading h3 {
-    font-size: 23px
-  }
-
-  .play-score-heading .score-total strong {
-    font-size: 38px
-  }
-
   .play-tray {
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 6px;
@@ -1754,9 +1763,6 @@ h1>span {
     font-size: 21px
   }
 
-  .play-score-heading .score-total span {
-    font-size: 7px
-  }
 }
 
 @media(orientation:landscape) and (max-height:600px) {

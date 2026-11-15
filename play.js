@@ -164,7 +164,8 @@ export class PlayBoard {
 
   tileElement(tile) {
     const element = document.createElement('button');
-    element.className = `play-tile${tile.tile === '?' ? ' play-blank' : ''}${this.selected === tile.id ? ' selected' : ''}${this.check?.invalidIds.includes(tile.id) ? ' invalid' : ''}`;
+    const checkedState = this.check && tile.x !== null ? this.check.invalidIds.includes(tile.id) ? ' invalid' : ' checked' : '';
+    element.className = `play-tile${tile.tile === '?' ? ' play-blank' : ''}${this.selected === tile.id ? ' selected' : ''}${checkedState}`;
     element.dataset.playTile = tile.id;
     element.textContent = tile.letter || '?';
     element.setAttribute('aria-label', `${tile.tile === '?' ? `Blank, ${tile.letter || 'choose a letter'}` : tile.letter}, tile ${tile.id + 1}, ${tile.x === null ? 'in tray' : `column ${tile.x}, row ${tile.y}`}${this.check?.invalidIds.includes(tile.id) ? ', invalid arrangement' : ''}`);
@@ -201,7 +202,8 @@ export class PlayBoard {
         this.edited();
         this.building = false;
         this.selected = null;
-        for (const red of document.querySelectorAll('.play-tile.invalid')) red.classList.remove('invalid');
+        for (const tile of document.querySelectorAll('.play-tile.invalid, .play-tile.checked')) tile.classList.remove('invalid', 'checked');
+        this.renderPoints(analyzeArrangement(this.tiles).score);
         for (const word of $('play-words').children) {
           word.classList.remove('invalid', 'checked');
           word.textContent = word.textContent.replace(/ [×✓]$/, '');
@@ -270,6 +272,12 @@ export class PlayBoard {
     if (drag.element.hasPointerCapture(drag.pointerId)) drag.element.releasePointerCapture(drag.pointerId);
   }
 
+  renderPoints(score) {
+    $('play-potential').textContent = score;
+    $('play-points').className = `play-points${this.check ? this.check.valid ? ' valid' : ' invalid' : ''}`;
+    $('play-points').setAttribute('aria-label', `${score} ${this.check ? this.check.valid ? 'checked' : 'invalid arrangement, potential' : 'potential'} points`);
+  }
+
   render() {
     const analysis = analyzeArrangement(this.tiles);
     const bounds = getBoardBounds(this.tiles);
@@ -307,7 +315,7 @@ export class PlayBoard {
     }
     grid.replaceChildren(...cells);
     this.fitGrid();
-    $('play-potential').textContent = analysis.score;
+    this.renderPoints(analysis.score);
     $('play-breakdown').textContent = `${analysis.longest} longest + ${analysis.words.length} words + ${analysis.bonus} all-tiles bonus · ${analysis.used} / 12 tiles on board`;
     $('play-hint').textContent = this.building
       ? 'Tap tray tiles in word order to build your horizontal word. Then choose Arrange tiles, or start dragging.'
