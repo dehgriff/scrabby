@@ -12,6 +12,7 @@ const files = [
   'app.js',
   'play.js',
   'play-model.js',
+  'round-timer.js',
   'tile-bag.js',
   'solver.js',
   'dictionary.js',

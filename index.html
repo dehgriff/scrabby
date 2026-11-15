@@ -49,7 +49,7 @@
             <p id="play-hint" class="play-hint"></p>
             <div class="tray-heading"><span>Off-board tiles</span><button id="return-tile" class="text-button" hidden>Return selected tile</button></div>
             <div id="play-tray" class="play-tray" aria-label="Off-board tiles; drop here to return a tile"></div>
-            <div class="play-tools"><button id="arrange-tiles" class="reject-button">Arrange tiles</button><button id="play-reset" class="reject-button">Reset board</button></div>
+            <div class="play-tools"><button id="arrange-tiles" class="reject-button">Arrange tiles</button><button id="play-reset" class="reject-button">Reset board</button><span id="play-timer" class="play-timer" role="timer" aria-live="off" aria-label="60 seconds remaining">60s</span></div>
             <div id="play-board-frame" class="play-board-frame" aria-label="Crossword board"><div id="play-grid" class="play-grid" aria-label="Your crossword grid"></div></div>
             <div id="play-words" class="words play-words" aria-label="Words in your arrangement"></div>
             <div class="play-actions"><button id="play-check" class="solve-button">Check words</button><button id="play-solve" class="reject-button">Solve this rack</button></div>
@@ -70,6 +70,7 @@
             <p>Play your own arrangement first, or choose Solve<br>to reveal the best way to bring your letters together.</p>
             <div class="empty-note"><span>12 tiles</span><span class="note-cross">×</span><span>one connected crossword</span></div>
           </div>
+          <div id="solver-loading" class="solver-loading" role="status" hidden><span class="solver-spinner" aria-hidden="true"></span><p>Finding the best arrangement…</p></div>
           <div id="solution" hidden>
             <div class="solution-heading"><div><p class="eyebrow" id="solution-kicker">PROVEN OPTIMAL</p><h3 id="solution-title">Your letters, working together.</h3></div><div class="score-total"><strong id="score">17</strong><span>POINTS</span></div></div>
             <div class="solution-actions"><button id="reject" class="reject-button" disabled>Reject word</button><button id="reject-common" class="reject-button" disabled>Reject + use common words</button></div>

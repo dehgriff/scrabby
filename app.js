@@ -26,7 +26,7 @@ function createWorker() {
     if (data.type === 'ready') $('device-status').textContent = 'SOWPODS ready';
     if (data.type === 'checked') playBoard.showCheck(data.result, data.revision);
     if (data.type === 'check-error') playBoard.showError(data.message, data.revision);
-    if (data.type === 'best') { best = data.result; renderResult(best); }
+    if (data.type === 'best') best = data.result;
     if (data.type === 'progress') progress = `Checking ${data.score}-point arrangements`;
     if (data.type === 'result') {
       best = data.result;
@@ -47,6 +47,7 @@ function createWorker() {
 function fail(message) {
   if (playBoard.checking) playBoard.showError(message, playBoard.revision);
   finish();
+  if (best) renderResult(best);
   $('error').textContent = message;
   $('error').hidden = false;
   $('search-status').textContent = 'Search interrupted. Tap Find best arrangement to retry.';
@@ -58,6 +59,8 @@ function fail(message) {
 function finish() {
   busy = false;
   clearInterval(timer);
+  $('solver-loading').hidden = true;
+  if (!best) $('empty-state').hidden = false;
   $('search-status').classList.remove('searching');
   document.querySelector('.result-panel').setAttribute('aria-busy', 'false');
   renderInput();
@@ -70,6 +73,7 @@ function resetResult() {
   $('reject').disabled = true;
   $('reject-common').disabled = true;
   $('solution').hidden = true;
+  $('solver-loading').hidden = true;
   $('empty-state').hidden = false;
   $('result-badge').textContent = 'THE POSSIBILITIES AWAIT';
   $('result-badge').className = 'result-badge';
@@ -154,10 +158,11 @@ function rejectMainWord(useCommonWords = false) {
 
 function solve({ preserveView = false } = {}) {
   if (rack.length !== 12 || busy) return;
+  playBoard.stopTimer();
   scrollToResult = !preserveView;
-  if (preserveView) {
-    // Keep the previous board and panel height while replacing this result.
-    // Collapsing it would clamp the page's scroll position on small screens.
+  if (preserveView || !$('solution').hidden) {
+    // Reserve the previous height so replacing a board with the spinner does
+    // not clamp the page's scroll position on small screens.
     const panel = document.querySelector('.result-panel');
     panel.style.minHeight = `${panel.getBoundingClientRect().height}px`;
   }
@@ -165,6 +170,10 @@ function solve({ preserveView = false } = {}) {
   busy = true;
   started = performance.now();
   best = null;
+  mainWord = '';
+  $('solution').hidden = true;
+  $('empty-state').hidden = true;
+  $('solver-loading').hidden = false;
   progress = 'Searching the highest-scoring shapes';
   $('error').hidden = true;
   $('search-status').classList.add('searching');
@@ -251,6 +260,7 @@ $('solve').onclick = () => {
 };
 $('play').onclick = () => {
   if (busy) stopSearch();
+  playBoard.startRound();
   document.querySelector('.play-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
 };
 $('play-solve').onclick = () => {

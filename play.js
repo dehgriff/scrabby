@@ -1,4 +1,5 @@
 import { createTiles, moveTile, appendTile, getBoardBounds, getGridLayout, analyzeArrangement } from './play-model.js';
+import { RoundTimer } from './round-timer.js';
 
 const $ = id => document.getElementById(id);
 
@@ -11,21 +12,34 @@ export class PlayBoard {
     this.check = null;
     this.building = true;
     this.blankId = null;
+    this.roundTimer = new RoundTimer(seconds => {
+      $('play-timer').textContent = `${seconds}s`;
+      $('play-timer').classList.toggle('expired', seconds === 0);
+      $('play-timer').setAttribute('aria-label', seconds === 0 ? 'Time is up' : `${seconds} seconds remaining`);
+    }, () => {
+      this.timeExpired = true;
+      this.requestCheck();
+    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.roundTimer.tick(); });
     $('arrange-tiles').onclick = () => { this.building = false; this.selected = null; this.render(); };
-    $('play-reset').onclick = () => this.reset(this.tiles.map(tile => tile.tile).join(''));
-    $('play-check').onclick = () => {
-      this.check = null;
-      this.checking = true;
-      this.render();
-      this.onCheck(this.tiles.map(tile => ({ ...tile })), this.revision);
+    $('play-reset').onclick = () => {
+      const restartRound = this.roundStarted;
+      this.reset(this.tiles.map(tile => tile.tile).join(''));
+      if (restartRound) this.startRound();
     };
+    $('play-check').onclick = () => this.requestCheck();
     $('return-tile').onclick = () => { if (this.selected !== null) this.place(this.selected, null, null); };
     for (const letter of 'QWERTYUIOPASDFGHJKLZXCVBNM') {
       const key = document.createElement('button');
       key.className = 'letter-key';
       key.textContent = letter;
       key.setAttribute('aria-label', `Set blank to ${letter}`);
-      key.onclick = () => {
+      key.onpointerdown = () => { this.blankPointerKey = key; };
+      key.onpointercancel = () => { this.blankPointerKey = null; };
+      key.onclick = event => {
+        // Ignore a delayed opening click unless a new press began on this key.
+        if (event.detail > 0 && this.blankPointerKey !== key) return;
+        this.blankPointerKey = null;
         const tile = this.tiles.find(item => item.id === this.blankId);
         $('blank-dialog').close();
         if (!tile) return;
@@ -54,6 +68,9 @@ export class PlayBoard {
   }
 
   reset(rack) {
+    this.roundTimer.reset();
+    this.roundStarted = false;
+    this.timeExpired = false;
     this.cancelDrag();
     if ($('blank-dialog').open) $('blank-dialog').close();
     this.tiles = createTiles(rack);
@@ -63,6 +80,27 @@ export class PlayBoard {
     $('play-content').hidden = this.tiles.length !== 12;
     $('play-empty').hidden = this.tiles.length === 12;
     this.render();
+  }
+
+  startRound() {
+    if (this.tiles.length !== 12) return;
+    this.roundStarted = true;
+    this.timeExpired = false;
+    this.roundTimer.start();
+    this.render();
+  }
+
+  stopTimer() {
+    this.roundTimer.stop();
+  }
+
+  requestCheck() {
+    if (this.checking) return;
+    this.cancelDrag();
+    this.check = null;
+    this.checking = true;
+    this.render();
+    this.onCheck(this.tiles.map(tile => ({ ...tile })), this.revision);
   }
 
   edited() {
@@ -105,6 +143,7 @@ export class PlayBoard {
     if (tile.tile === '?') {
       this.render();
       this.blankId = tile.id;
+      this.blankPointerKey = null;
       $('blank-dialog').showModal();
       return;
     }
@@ -130,7 +169,8 @@ export class PlayBoard {
     element.textContent = tile.letter || '?';
     element.setAttribute('aria-label', `${tile.tile === '?' ? `Blank, ${tile.letter || 'choose a letter'}` : tile.letter}, tile ${tile.id + 1}, ${tile.x === null ? 'in tray' : `column ${tile.x}, row ${tile.y}`}${this.check?.invalidIds.includes(tile.id) ? ', invalid arrangement' : ''}`);
     element.setAttribute('aria-pressed', String(this.selected === tile.id));
-    element.onclick = event => { if (event.detail === 0) this.tapTile(tile); };
+    const interaction = { dragged: false };
+    element.onclick = () => { if (!interaction.dragged) this.tapTile(tile); };
     element.onkeydown = event => {
       const offsets = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
       if (tile.x !== null && offsets[event.key]) {
@@ -140,11 +180,14 @@ export class PlayBoard {
       }
       if (event.key === 'Backspace' || event.key === 'Delete') { event.preventDefault(); this.place(tile.id, null, null); }
     };
-    element.onpointerdown = event => this.pointerDown(event, tile, element);
+    element.onpointerdown = event => {
+      interaction.dragged = false;
+      this.pointerDown(event, tile, element, interaction);
+    };
     return element;
   }
 
-  pointerDown(event, tile, element) {
+  pointerDown(event, tile, element, interaction) {
     if (!event.isPrimary || event.button !== 0 || this.drag) return;
     element.setPointerCapture(event.pointerId);
     const drag = { id: tile.id, startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY, moving: false, element, pointerId: event.pointerId };
@@ -154,6 +197,7 @@ export class PlayBoard {
       drag.y = move.clientY;
       if (!drag.moving && Math.hypot(drag.x - drag.startX, drag.y - drag.startY) >= 8) {
         drag.moving = true;
+        interaction.dragged = true;
         this.edited();
         this.building = false;
         this.selected = null;
@@ -185,8 +229,10 @@ export class PlayBoard {
       const cell = target?.closest('[data-cell]');
       const tray = target?.closest('#play-tray');
       this.cancelDrag();
-      if (!moving) this.tapTile(tile);
-      else if (cell) this.place(tile.id, Number(cell.dataset.x), Number(cell.dataset.y));
+      // A tap is handled by click, after pointerup completes. Opening the blank
+      // dialog here lets the original tap land on a newly displayed letter key.
+      if (!moving) return;
+      if (cell) this.place(tile.id, Number(cell.dataset.x), Number(cell.dataset.y));
       else if (tray) this.place(tile.id, null, null);
       else { this.message = 'Drop onto an empty grid cell or back into the tray.'; this.render(); }
     };
@@ -280,8 +326,8 @@ export class PlayBoard {
       return chip;
     }));
     $('play-status').className = `play-status${this.check ? this.check.valid ? ' valid' : ' invalid' : ''}`;
-    $('play-status').textContent = this.message || (this.checking ? 'Checking SOWPODS and the two- and three-letter lists…' : this.check
+    $('play-status').textContent = (this.timeExpired ? 'Time’s up! You can keep arranging. ' : '') + (this.message || (this.checking ? 'Checking SOWPODS and the two- and three-letter lists…' : this.check
       ? this.check.valid ? `All words valid · ${this.check.score} points.${analysis.unused ? ` ${analysis.unused} tiles still in the tray.` : ' All 12 tiles used!'} Keep arranging to try for more.` : this.check.issues.join(' ')
-      : 'Potential score only. Check words when you’re ready.');
+      : 'Potential score only. Check words when you’re ready.'));
   }
 }
