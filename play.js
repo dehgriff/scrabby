@@ -64,6 +64,7 @@ export class PlayBoard {
 
   reset(rack, { preserveTimer = false } = {}) {
     if (!preserveTimer) {
+      this.active = false;
       this.roundTimer.reset();
       this.timeExpired = false;
     }
@@ -73,13 +74,12 @@ export class PlayBoard {
     this.building = true;
     this.selected = null;
     this.edited();
-    $('play-content').hidden = this.tiles.length !== 12;
-    $('play-empty').hidden = this.tiles.length === 12;
     this.render();
   }
 
   startRound() {
     if (this.tiles.length !== 12) return;
+    this.active = true;
     this.timeExpired = false;
     this.roundTimer.start();
     this.render();
@@ -90,7 +90,7 @@ export class PlayBoard {
   }
 
   requestCheck() {
-    if (this.checking) return;
+    if (!this.active || this.checking) return;
     this.cancelDrag();
     this.check = null;
     this.checking = true;
@@ -274,6 +274,18 @@ export class PlayBoard {
   }
 
   render() {
+    const ready = this.active && this.tiles.length === 12;
+    $('play-content').hidden = !ready;
+    $('play-empty').hidden = ready;
+    $('play-empty').textContent = this.tiles.length === 12
+      ? 'Your letters are ready. Tap Play above to start the countdown and reveal your tiles.'
+      : 'Choose 12 letters above, then tap Play to build your crossword.';
+    if (!ready) {
+      this.bounds = null;
+      $('play-tray').replaceChildren();
+      $('play-grid').replaceChildren();
+      return;
+    }
     const analysis = analyzeArrangement(this.tiles);
     const bounds = getBoardBounds(this.tiles);
     this.bounds = bounds;
