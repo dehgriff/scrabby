@@ -89,3 +89,14 @@ export function checkArrangement(tiles, dictionary) {
   if (invalidWords.length) issues.push(`Not in the allowed word lists: ${[...new Set(invalidWords.map(word => word.text))].join(', ')}.`);
   return { ...analysis, invalidWords, invalidIds: [...invalidIds], issues, valid: !issues.length };
 }
+
+export function getPlayMainWord(tiles) {
+  const analysis = analyzeArrangement(tiles);
+  const position = word => tiles.find(tile => tile.id === word.ids[0]);
+  const candidates = analysis.words.filter(word => word.direction === 'across' && word.text.length === analysis.longest && /^[A-Z]+$/.test(word.text));
+  candidates.sort((a, b) => {
+    const pa = position(a), pb = position(b);
+    return Number(pa.y !== 0) - Number(pb.y !== 0) || pa.y - pb.y || pa.x - pb.x;
+  });
+  return candidates[0]?.text || '';
+}

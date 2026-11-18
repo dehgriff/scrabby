@@ -1758,3 +1758,7 @@ h1>span {
   word-spacing: .5em;
   line-height: 2
 }
+
+.play-actions { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr); gap:8px }
+.play-actions > button { min-width:0; padding-inline:8px }
+.solver-main-word { font-size:12px; line-height:1.6; color:var(--purple); margin:12px 0 }

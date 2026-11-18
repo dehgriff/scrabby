@@ -24,17 +24,18 @@ export function scoreBoard(cells, letters) {
   return { score: longest + words.length + bonus, longest, bonus, words };
 }
 
-export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedWords = []) {
+export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedWords = [], requiredMainWord = '') {
   if (!/^[A-Z?]{12}$/.test(rack)) throw new Error('Choose exactly 12 letters or blanks.');
   const blanks = [...rack].filter(ch => ch === '?').length;
   if (blanks > MAX_BLANKS) throw new Error(`Choose at most ${MAX_BLANKS} blank tiles.`);
+  if (requiredMainWord && !/^[A-Z]{2,12}$/.test(requiredMainWord)) throw new Error('The main word must have 2–12 assigned letters.');
   const counts = new Int8Array(26);
   for (const ch of rack) if (ch !== '?') counts[ch.charCodeAt(0) - 65]++;
   const byLength = Array.from({ length: 13 }, () => []);
   const needed = new Int8Array(26);
   const rejected = new Set(rejectedWords);
   for (const word of dictionary) {
-    if (word.length < 2 || word.length > 12 || rejected.has(word)) continue;
+    if (word.length < 2 || word.length > 12 || rejected.has(word) || (requiredMainWord && word.length > requiredMainWord.length)) continue;
     needed.fill(0);
     let valid = true;
     let missing = 0;
@@ -50,12 +51,16 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
     for (const word of words) for (let p = 0; p < word.length; p++) index[p][word[p]].push(word);
     return index;
   });
+  const required = requiredMainWord ? byLength[requiredMainWord.length].find(word => Array.from(word, n => String.fromCharCode(n + 64)).join('') === requiredMainWord) : null;
+  if (requiredMainWord && !required) throw new Error(`“${requiredMainWord}” is not allowed by the active word lists and rejections, or cannot be made from this rack.`);
 
-  function result(cells, assigned, optimal, checked) {
+  function result(cells, assigned, optimal, checked, requiredSlot = -1) {
     cells = Array.from(cells);
     const slots = getSlots(cells);
     const longest = Math.max(...slots.map(slot => slot.length));
-    const horizontalLongest = slots.some(slot => slot.length === longest && cells[slot[1]] - cells[slot[0]] === 1);
+    const horizontalLongest = requiredSlot >= 0
+      ? cells[slots[requiredSlot][1]] - cells[slots[requiredSlot][0]] === 1
+      : slots.some(slot => slot.length === longest && cells[slot[1]] - cells[slot[0]] === 1);
     // Swap rows and columns if necessary. This preserves word reading order,
     // score, tile indices and blank assignments, while putting a longest word across.
     if (!horizontalLongest) cells = cells.map(p => (p % 16) * 16 + Math.floor(p / 16));
@@ -67,13 +72,13 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
       if (index === -1) { index = used.indexOf('?'); blankIndices.push(i); }
       used.splice(index, 1);
     }
-    return { cells: Array.from(cells), letters, blankIndices, ...scoreBoard(cells, letters), unused: used, optimal, checked };
+    return { cells: Array.from(cells), letters, blankIndices, ...scoreBoard(cells, letters), unused: used, optimal, checked, requiredMainWord };
   }
 
   let best = null;
   for (let length = 12; length >= 2; length--) {
     if (!byLength[length].length) continue;
-    best = result(Uint8Array.from({ length }, (_, i) => i), byLength[length][0], false, 0);
+    best = result(Uint8Array.from({ length }, (_, i) => i), required || byLength[length][0], false, 0);
     report({ type: 'best', result: best });
     break;
   }
@@ -92,6 +97,7 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
     if (score <= best.score) return { ...best, optimal: true, checked };
     checked++;
     const slots = getSlots(cells);
+    if (required && Math.max(...slots.map(slot => slot.length)) !== required.length) continue;
     if (slots.some(s => !byLength[s.length].length)) continue;
     if (performance.now() - lastReport > 250) {
       report({ type: 'progress', score, checked });
@@ -99,6 +105,7 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
     }
     const assigned = new Uint8Array(size);
     const done = new Uint8Array(slots.length);
+    let requiredSlot = -1;
 
     function fits(word, slot) {
       // Count only newly occupied cells; a crossing spends its tile just once.
@@ -120,8 +127,8 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
       for (let s = 0; s < slots.length; s++) {
         if (done[s]) continue;
         const slot = slots[s];
-        let pool = byLength[slot.length];
-        for (let p = 0; p < slot.length; p++) {
+        let pool = s === requiredSlot ? [required] : byLength[slot.length];
+        for (let p = 0; s !== requiredSlot && p < slot.length; p++) {
           const ch = assigned[slot[p]];
           if (ch && positional[slot.length][p][ch].length < pool.length) pool = positional[slot.length][p][ch];
         }
@@ -158,7 +165,13 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
       done[selected] = 0;
       return false;
     }
-    if (search(0)) return result(cells, assigned, true, checked);
+    // Try every longest slot: either orientation can become horizontal after
+    // transposition, and equal-length slots can have different crossing options.
+    const anchors = required ? slots.flatMap((slot, i) => slot.length === required.length ? [i] : []) : [-1];
+    for (const anchor of anchors) {
+      requiredSlot = anchor;
+      if (search(0)) return result(cells, assigned, true, checked, anchor);
+    }
   }
   return { ...best, optimal: true, checked };
 }

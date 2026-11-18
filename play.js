@@ -1,4 +1,4 @@
-import { createTiles, moveTile, appendTile, getBoardBounds, getGridLayout, analyzeArrangement } from './play-model.js';
+import { createTiles, moveTile, appendTile, getBoardBounds, getGridLayout, analyzeArrangement, getPlayMainWord } from './play-model.js';
 import { RoundTimer } from './round-timer.js';
 
 const $ = id => document.getElementById(id);
@@ -275,6 +275,10 @@ export class PlayBoard {
 
   render() {
     const ready = this.active && this.tiles.length === 12;
+    const mainWord = ready ? getPlayMainWord(this.tiles) : '';
+    $('play-solve-main').disabled = this.solving || !mainWord;
+    $('play-solve-main').title = mainWord ? `Keep ${mainWord} as the main word` : 'Build a horizontal main word first';
+    $('play-solve-main').setAttribute('aria-label', mainWord ? `Solve with my main word: ${mainWord}` : 'Solve with my main word');
     $('play-content').hidden = !ready;
     $('play-empty').hidden = ready;
     $('play-empty').textContent = this.tiles.length === 12
@@ -329,7 +333,7 @@ export class PlayBoard {
       : 'Drag tiles to an empty cell or the tray. You can also select a tile, then tap an empty cell. Tap a blank to set its letter.';
     $('play-reset').disabled = !analysis.used && !this.tiles.some(tile => tile.tile === '?' && tile.letter);
     $('play-check').disabled = !analysis.used || this.checking;
-    $('play-check').textContent = this.checking ? 'Checking…' : 'Check words';
+    $('play-check').textContent = this.checking ? 'Checking…' : 'Check';
     $('return-tile').hidden = this.selected === null;
     $('play-words').replaceChildren(...analysis.words.map(word => {
       const chip = document.createElement('span');

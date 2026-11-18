@@ -1,6 +1,7 @@
 import { getSlots, MAX_BLANKS } from './solver.js';
 import { drawTiles, TILE_COUNTS } from './tile-bag.js';
 import { PlayBoard } from './play.js';
+import { getPlayMainWord } from './play-model.js';
 
 const $ = id => document.getElementById(id);
 const disabledManualLetters = new Set('QJZX');
@@ -9,6 +10,7 @@ let worker;
 let busy = false;
 let best = null;
 let mainWord = '';
+let requiredMainWord = '';
 let commonWords = false;
 const rejectedWords = new Set();
 let started = 0;
@@ -37,7 +39,7 @@ function createWorker() {
       finish();
       renderResult(best);
       $('search-status').textContent = best.words.length
-        ? `Proven optimal · ${((performance.now() - started) / 1000).toFixed(1)}s · ${commonWords ? 'common words + your short-word lists' : 'SOWPODS with your word lists'}`
+        ? `Proven optimal${requiredMainWord ? ` with ${requiredMainWord}` : ''} · ${((performance.now() - started) / 1000).toFixed(1)}s · ${commonWords ? 'common words + your short-word lists' : 'SOWPODS with your word lists'}`
         : commonWords ? 'No solution with the current common-word list and rejections. Try Use SOWPODS or Reset rejections.' : rejectedWords.size ? 'No valid words remain with these rejections. Reset rejections to try the full list again.' : 'No valid word can be made with these letters. Try a different rack.';
       if (scrollToResult && matchMedia('(max-width: 640px), (orientation: landscape) and (max-height: 600px)').matches) {
         document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
@@ -72,6 +74,8 @@ function finish() {
 }
 
 function resetResult() {
+  requiredMainWord = '';
+  $('solver-main-word').hidden = true;
   document.querySelector('.result-panel').style.minHeight = '';
   best = null;
   mainWord = '';
@@ -139,10 +143,13 @@ function renderInput() {
   $('input-hint').textContent = busy ? 'Working entirely on your device' : rack.length === 12 ? 'Play first, or reveal the best arrangement' : 'Draw 12 letters or choose your own';
   $('play').disabled = rack.length !== 12;
   $('play-solve').disabled = rack.length !== 12;
-  $('play-solve').textContent = busy ? 'Show solver' : 'Solve this rack';
+  $('play-solve').textContent = busy ? 'Show solver' : 'Solve';
+  playBoard.solving = busy;
+  $('play-solve-main').disabled = busy || !playBoard.active || !getPlayMainWord(playBoard.tiles);
   $('reject').disabled = busy || !best || !mainWord;
   $('reject-common').disabled = busy || !best || !mainWord;
-  $('reject-common').hidden = commonWords;
+  $('reject').hidden = Boolean(requiredMainWord);
+  $('reject-common').hidden = commonWords || Boolean(requiredMainWord);
   $('dictionary-label').textContent = commonWords ? 'Common words (4+ letters)' : 'SOWPODS';
   $('use-sowpods').hidden = !commonWords;
   $('use-sowpods').disabled = busy;
@@ -162,8 +169,16 @@ function rejectMainWord(useCommonWords = false) {
   solve({ preserveView: true });
 }
 
-function solve({ preserveView = false } = {}) {
+function solve({ preserveView = false, requiredWord = requiredMainWord } = {}) {
   if (rack.length !== 12 || busy) return;
+  if (requiredWord !== requiredMainWord) {
+    rejectedWords.clear();
+    renderRejections();
+  }
+  requiredMainWord = requiredWord;
+  if (requiredMainWord) commonWords = false;
+  $('solver-main-word').hidden = !requiredMainWord;
+  $('solver-main-word').textContent = requiredMainWord ? `Main word: ${requiredMainWord}. Choose “Solve” in Play to search freely.` : '';
   playBoard.stopTimer();
   scrollToResult = !preserveView;
   if (preserveView || !$('solution').hidden) {
@@ -191,7 +206,7 @@ function solve({ preserveView = false } = {}) {
     $('search-status').textContent = `${progress} · ${Math.floor((performance.now() - started) / 1000)}s`;
   }, 500);
   renderInput();
-  worker.postMessage({ rack: rack.join(''), rejectedWords: [...rejectedWords], commonWords });
+  worker.postMessage({ rack: rack.join(''), rejectedWords: [...rejectedWords], commonWords, requiredMainWord });
 }
 
 function renderResult(result) {
@@ -207,7 +222,7 @@ function renderResult(result) {
   $('board').style.setProperty('--cols', cols);
   $('board').style.setProperty('--board-width', `${cols * 43 + (cols - 1) * 4}px`);
   const slots = getSlots(result.cells);
-  const longest = slots.find(slot => slot.length === result.longest && result.cells[slot[1]] - result.cells[slot[0]] === 1) || [];
+  const longest = slots.find(slot => slot.length === result.longest && result.cells[slot[1]] - result.cells[slot[0]] === 1 && (!requiredMainWord || slot.map(i => result.letters[i]).join('') === requiredMainWord)) || [];
   mainWord = longest.map(i => result.letters[i]).join('');
   $('reject').title = mainWord ? `Reject “${mainWord}” and find another solution` : 'Reject the highlighted main word';
   $('reject').disabled = busy || !mainWord;
@@ -260,7 +275,7 @@ $('blank').onclick = () => addLetter('?');
 $('solve').onclick = () => {
   if (busy) stopSearch();
   else {
-    solve();
+    solve({ requiredWord: '' });
     document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
   }
 };
@@ -270,7 +285,13 @@ $('play').onclick = () => {
   document.querySelector('.play-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
 };
 $('play-solve').onclick = () => {
-  if (!busy) solve();
+  if (!busy) solve({ requiredWord: '' });
+  document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
+};
+$('play-solve-main').onclick = () => {
+  const word = playBoard.active ? getPlayMainWord(playBoard.tiles) : '';
+  if (busy || !word) return;
+  solve({ requiredWord: word });
   document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: 'instant' });
 };
 $('reject').onclick = () => rejectMainWord();

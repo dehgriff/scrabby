@@ -39,7 +39,7 @@ self.onmessage = async ({ data }) => {
       return;
     }
     const selectedDictionary = data.commonWords ? commonDictionary : dictionary;
-    const result = solveRack(data.rack, selectedDictionary, shapes, update => postMessage(update), data.rejectedWords || []);
+    const result = solveRack(data.rack, selectedDictionary, shapes, update => postMessage(update), data.rejectedWords || [], data.requiredMainWord || '');
     postMessage({ type: 'result', result });
   } catch (error) {
     postMessage({ type: data.type === 'check' ? 'check-error' : 'error', revision: data.revision, message: error.message });
