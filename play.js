@@ -4,8 +4,9 @@ import { RoundTimer } from './round-timer.js';
 const $ = id => document.getElementById(id);
 
 export class PlayBoard {
-  constructor(onCheck) {
+  constructor(onCheck, onDefine = () => {}) {
     this.onCheck = onCheck;
+    this.onDefine = onDefine;
     this.revision = 0;
     this.tiles = [];
     this.selected = null;
@@ -336,10 +337,13 @@ export class PlayBoard {
     $('play-check').textContent = this.checking ? 'Checking…' : 'Check';
     $('return-tile').hidden = this.selected === null;
     $('play-words').replaceChildren(...analysis.words.map(word => {
-      const chip = document.createElement('span');
+      const chip = document.createElement('button');
       const invalid = this.check?.invalidWords.some(item => item.direction === word.direction && item.ids.join(',') === word.ids.join(','));
       chip.className = `play-word${invalid ? ' invalid' : this.check ? ' checked' : ''}`;
       chip.textContent = `${word.text}${invalid ? ' ×' : this.check ? ' ✓' : ''}`;
+      chip.disabled = invalid || !/^[A-Z]{2,12}$/.test(word.text);
+      chip.setAttribute('aria-label', `Definition of ${word.text}${invalid ? ' (invalid word)' : ''}`);
+      chip.onclick = () => this.onDefine(word.text, Boolean(this.check));
       return chip;
     }));
     $('play-status').className = `play-status${this.check ? this.check.valid ? ' valid' : ' invalid' : ''}`;

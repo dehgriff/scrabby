@@ -77,7 +77,7 @@
             <p id="blank-note" class="blank-note" hidden></p>
             <div id="unused" class="unused" hidden></div>
             <div class="score-breakdown"><div><strong id="longest-score">6</strong><span>Longest word</span></div><span>+</span><div><strong id="words-score">10</strong><span>Words made</span></div><span>+</span><div><strong id="bonus-score">1</strong><span>All 12 tiles</span></div></div>
-            <div class="word-list-heading"><h4>The words you made</h4><span>Tap to highlight</span></div><div id="words" class="words"></div>
+            <div class="word-list-heading"><h4>The words you made</h4><span>Tap for definitions</span></div><div id="words" class="words"></div>
           </div>
           <div id="rejections" class="rejections" hidden><p id="rejected-words"></p><button id="reset-rejections" class="text-button">Reset rejections</button></div>
           <div id="search-status" class="search-status" role="status" aria-live="polite"></div>
@@ -92,6 +92,11 @@
     <div class="section-heading"><h2 id="blank-dialog-title">Choose a letter for this blank</h2><button id="blank-cancel" class="text-button">Cancel</button></div>
     <p>The same letter is used in both words at a crossing.</p>
     <div id="blank-keyboard" class="keyboard" aria-label="Blank letter choices"></div>
+  </dialog>
+  <dialog id="definition-dialog" class="definition-dialog" aria-labelledby="definition-word">
+    <div class="definition-heading"><h2 id="definition-word">Definition</h2><button id="definition-close" class="reject-button" autofocus>Close</button></div>
+    <div id="definition-content" class="definition-content" aria-live="polite"></div>
+    <p class="definition-attribution">Definitions from <a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer">Free Dictionary API</a></p>
   </dialog>
   <script type="module" src="./app.js"></script>
 </body>

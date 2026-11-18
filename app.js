@@ -2,6 +2,7 @@ import { getSlots, MAX_BLANKS } from './solver.js';
 import { drawTiles, TILE_COUNTS } from './tile-bag.js';
 import { PlayBoard } from './play.js';
 import { getPlayMainWord } from './play-model.js';
+import { DefinitionDialog } from './definitions.js';
 
 const $ = id => document.getElementById(id);
 const disabledManualLetters = new Set('QJZX');
@@ -17,15 +18,42 @@ let started = 0;
 let timer;
 let scrollToResult = true;
 let progress = 'Searching the highest-scoring shapes';
+const definitions = new DefinitionDialog();
+let lookupId = 0;
+const wordLookups = new Map();
+function isAllowedWord(word, signal) {
+  if (!worker) createWorker();
+  return new Promise((resolve, reject) => {
+    const id = ++lookupId;
+    const abort = () => { wordLookups.delete(id); reject(new Error('Dictionary lookup interrupted.')); };
+    if (signal?.aborted) { abort(); return; }
+    signal?.addEventListener('abort', abort, { once: true });
+    wordLookups.set(id, { resolve, reject, cleanup: () => signal?.removeEventListener('abort', abort) });
+    worker.postMessage({ type: 'word-validity', id, word });
+  });
+}
+function cancelWordLookups() {
+  for (const pending of wordLookups.values()) { pending.cleanup(); pending.reject(new Error('Dictionary lookup interrupted.')); }
+  wordLookups.clear();
+}
 const playBoard = new PlayBoard((tiles, revision) => {
   if (busy) stopSearch();
   if (!worker) createWorker();
   worker.postMessage({ type: 'check', tiles, revision });
-});
+}, (word, knownValid) => definitions.open(word, knownValid ? undefined : signal => isAllowedWord(word, signal)));
 
 function createWorker() {
   worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
   worker.onmessage = ({ data }) => {
+    if (data.type === 'word-validity') {
+      const pending = wordLookups.get(data.id);
+      if (pending) {
+        pending.cleanup();
+        if (data.error) pending.reject(new Error(data.error));
+        else pending.resolve(data.valid);
+        wordLookups.delete(data.id);
+      }
+    }
     if (data.type === 'ready') {
       $('device-status').textContent = 'SOWPODS ready';
       $('allowed-two-words').textContent = data.twoLetterWords.join(' ') || 'No two-letter words are enabled.';
@@ -51,6 +79,7 @@ function createWorker() {
 }
 
 function fail(message) {
+  cancelWordLookups();
   if ($('allowed-two-words').textContent === 'Loading words…') $('allowed-two-words').textContent = 'Could not load the word list.';
   if (playBoard.checking) playBoard.showError(message, playBoard.revision);
   finish();
@@ -92,6 +121,7 @@ function resetResult() {
 
 function stopSearch() {
   if (!busy) return;
+  cancelWordLookups();
   worker.terminate();
   worker = null;
   finish();
@@ -241,17 +271,12 @@ function renderResult(result) {
   }));
   $('board').setAttribute('aria-label', `Crossword using ${result.cells.length} tiles. Words: ${result.words.join(', ') || 'none'}.`);
   const order = slots.map((slot, i) => ({ slot, word: result.words[i] })).sort((a, b) => b.word.length - a.word.length || a.word.localeCompare(b.word));
-  $('words').replaceChildren(...order.map(({ slot, word }) => {
+  $('words').replaceChildren(...order.map(({ word }) => {
     const chip = document.createElement('button');
     chip.className = `word-chip${word.length === result.longest ? ' is-longest' : ''}`;
     chip.textContent = word;
-    chip.setAttribute('aria-pressed', 'false');
-    chip.onclick = () => {
-      const active = chip.getAttribute('aria-pressed') !== 'true';
-      for (const child of $('words').children) child.setAttribute('aria-pressed', 'false');
-      chip.setAttribute('aria-pressed', String(active));
-      for (let i = 0; i < $('board').children.length; i++) $('board').children[i].classList.toggle('highlight', active && slot.includes(i));
-    };
+    chip.setAttribute('aria-label', `Definition of ${word}`);
+    chip.onclick = () => definitions.open(word);
     return chip;
   }));
   $('unused').hidden = !result.unused.length;
@@ -311,6 +336,7 @@ $('example').onclick = () => changeRack(drawTiles());
 $('bag-tiles').textContent = Object.entries(TILE_COUNTS).map(([letter, count]) => letter.repeat(count)).join(' ');
 document.addEventListener('keydown', event => {
   if (event.defaultPrevented) return;
+  if ($('definition-dialog').open) return;
   if ($('blank-dialog').open) return;
   if (event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
   if (/^[a-z]$/i.test(event.key)) { event.preventDefault(); addLetter(event.key.toUpperCase()); }

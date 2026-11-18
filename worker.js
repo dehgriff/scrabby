@@ -34,6 +34,10 @@ ready.then(({ dictionary }) => postMessage({
 self.onmessage = async ({ data }) => {
   try {
     const { dictionary, dictionarySet, commonDictionary, shapes } = await ready;
+    if (data.type === 'word-validity') {
+      postMessage({ type: 'word-validity', id: data.id, valid: dictionarySet.has(data.word) });
+      return;
+    }
     if (data.type === 'check') {
       postMessage({ type: 'checked', revision: data.revision, result: checkArrangement(data.tiles, dictionarySet) });
       return;
@@ -42,6 +46,10 @@ self.onmessage = async ({ data }) => {
     const result = solveRack(data.rack, selectedDictionary, shapes, update => postMessage(update), data.rejectedWords || [], data.requiredMainWord || '');
     postMessage({ type: 'result', result });
   } catch (error) {
+    if (data.type === 'word-validity') {
+      postMessage({ type: 'word-validity', id: data.id, error: error.message });
+      return;
+    }
     postMessage({ type: data.type === 'check' ? 'check-error' : 'error', revision: data.revision, message: error.message });
   }
 };

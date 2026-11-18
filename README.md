@@ -15,7 +15,7 @@ npm start
 
 Run these commands from the cloned repository. Open **http://localhost:5173** in a browser on the computer running the server. Set the `PORT` environment variable to change the default port of 5173.
 
-You can also serve these files from any static web host, including GitHub Pages. Serve over HTTP(S), not by opening `index.html` directly. The app has no server-side solver, accounts, API keys, analytics, or external runtime dependencies.
+You can also serve these files from any static web host, including GitHub Pages. Serve over HTTP(S), not by opening `index.html` directly. The app has no server-side solver, accounts, API keys or analytics. Core play and solving have no external runtime dependencies; optional word definitions use the Free Dictionary API on demand.
 
 On HTTPS or localhost, a service worker caches the app and data for offline use after the first complete load. Use a current Safari, Chrome, Firefox or Edge (gzip `DecompressionStream` and module workers are required). On mobile, open the deployed HTTPS site and use the browser’s **Add to Home Screen** option for convenient access.
 
@@ -47,7 +47,7 @@ Cloudflare Pages supports both public and private Git repositories. Changing onl
 - Tap a selected tile to remove it, or choose **Clear all**.
 - On a computer, type letters and use Backspace to remove the last tile.
 - The three sections are **Your letters**, **Your crossword**, and **Your best arrangement**. Play scrolls to the board; Solve reveals the solver's arrangement in the third section without changing the play board.
-- Tap a solver result word to highlight its position. Every distinct word placement counts, even when its spelling appears elsewhere.
+- Tap a word pill in Play or the solver to open its definition. Play words are validated against the allowed lists before lookup; invalid words cannot be looked up. Definitions are fetched on demand from [Free Dictionary API](https://dictionaryapi.dev/) and formatted by part of speech, with examples where available. Missing definitions do not affect game validity. Definitions require an internet connection; only the requested word is sent to the service. Results are cached for the current session, and the modal includes source/license links supplied by the API. Every distinct word placement counts, even when its spelling appears elsewhere.
 - Tap **Reject word** to exclude the highlighted main long word and solve the same rack again. Rejections accumulate for that rack and exclude those words everywhere in subsequent arrangements. The next result is optimal for the remaining allowed words. **Reset rejections** restores them and searches again; changing the rack also clears them. Rejections do not edit your word-list files and are cleared on page reload.
 - **Reject + use common words** also switches to the common-word list for all words of four letters or more, keeping your two- and three-letter lists unchanged. The dictionary label shows which mode is active. Further rejections stay in common mode. **Use SOWPODS** switches back, retaining rejections; **Reset rejections** only resets exclusions. Each new rack (including an example) and page reload defaults to SOWPODS.
 - **Stop search** (or Escape) keeps the best arrangement found so far. It is explicitly labelled unproven. Search again to finish proving the optimum.
