@@ -1781,3 +1781,9 @@ h1>span {
 .definition-sources { display:flex; flex-wrap:wrap; gap:12px }
 .play-word:disabled { cursor:default }
 .play-word:not(:disabled):hover,.word-chip:hover { border-color:var(--purple); filter:brightness(1.15) }
+
+.longest-possible {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border)
+}

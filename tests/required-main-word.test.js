@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { solveRack, getSlots } from '../solver.js';
 import { createTiles, moveTile, getPlayMainWord } from '../play-model.js';
+import { prepareCommonDictionary } from '../dictionary.js';
 
 const shapes = new Uint8Array(gunzipSync(readFileSync(new URL('../data/shapes.bin.gz', import.meta.url))));
 const dictionary = gunzipSync(readFileSync(new URL('../data/sowpods.txt.gz', import.meta.url))).toString().trim().split(/\s+/);
@@ -60,8 +61,28 @@ test('keeping a shorter main word rules out longer words, with a proven baseline
   const result = solveRack(rack, words, shapes, () => {}, [], 'AT');
   validate(result, rack, new Set(words), 'AT');
   assert.equal(result.score, 3);
+  assert.equal(result.longestPossibleWord, 'CAT', 'the longest possible word ignores the fixed-main-word length limit');
   assert.equal(result.optimal, true);
   assert.equal(solveRack(rack, words, shapes).score, 4);
+});
+
+test('the longest possible word follows the active dictionary and rejections', () => {
+  const words = ['AT', 'CAT', 'CATS', 'DETENT'];
+  const common = prepareCommonDictionary(words, 'CATS');
+  const rack = 'CATSDETENT??';
+  const noShapes = new Uint8Array();
+  assert.equal(solveRack(rack, words, noShapes).longestPossibleWord, 'DETENT');
+  assert.equal(solveRack(rack, common, noShapes).longestPossibleWord, 'CATS');
+  assert.equal(solveRack(rack, words, noShapes, () => {}, ['DETENT']).longestPossibleWord, 'CATS');
+});
+
+test('the longest possible word respects physical blanks and counts, with alphabetical ties', () => {
+  const words = ['BAAA', 'AAAB', 'AAAA', 'AB'];
+  const noShapes = new Uint8Array();
+  assert.equal(solveRack('AAA?ZZZZZZZZ', words, noShapes).longestPossibleWord, 'AAAA');
+  assert.equal(solveRack('AAA?ZZZZZZZZ', words, noShapes, () => {}, ['AAAA']).longestPossibleWord, 'AAAB');
+  assert.equal(solveRack('A??ZZZZZZZZZ', words, noShapes).longestPossibleWord, 'AB');
+  assert.equal(solveRack('ZZZZZZZZZZZZ', words, noShapes).longestPossibleWord, '');
 });
 
 test('unavailable, rejected, malformed and unmakeable main words fail explicitly', () => {

@@ -78,6 +78,8 @@ Choose **Solve with my word** to optimise around your played word instead of sea
 
 The result identifies the fixed main word. Reject buttons are hidden while a word is fixed, since rejecting it would contradict the constraint. Choose **Solve**, or use **Solve** in section one, to search freely. Switching between fixed and free searches clears previous solver rejections.
 
+The bottom of the solution section shows one **Longest possible word** for the rack, with a clickable definition pill. It uses the active dictionary and short-word lists, respects blanks and solver rejections, and chooses alphabetically if several words tie. This can be longer than the word in the highest-scoring crossword, and is not limited by **Solve with my word**.
+
 ## Rules and exactness
 
 Words read left to right and downwards. Every maximal horizontal or vertical run of two or more tiles must be in the active dictionary: SOWPODS for words of four or more letters, and the editable short-word lists for two- and three-letter words. All used tiles connect by edges. One-letter runs do not count as words. Unused letters are permitted, with the bonus awarded only when all 12 are used.

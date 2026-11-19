@@ -103,6 +103,7 @@ function finish() {
 }
 
 function resetResult() {
+  $('longest-possible').hidden = true;
   requiredMainWord = '';
   $('solver-main-word').hidden = true;
   document.querySelector('.result-panel').style.minHeight = '';
@@ -225,6 +226,7 @@ function solve({ preserveView = false, requiredWord = requiredMainWord } = {}) {
   $('solution').hidden = true;
   $('empty-state').hidden = true;
   $('solver-loading').hidden = false;
+  $('longest-possible').hidden = true;
   progress = 'Searching the highest-scoring shapes';
   $('error').hidden = true;
   $('search-status').classList.add('searching');
@@ -240,6 +242,12 @@ function solve({ preserveView = false, requiredWord = requiredMainWord } = {}) {
 }
 
 function renderResult(result) {
+  const longestPossible = result.longestPossibleWord || '';
+  $('longest-possible').hidden = !longestPossible;
+  $('longest-possible-word').textContent = longestPossible;
+  $('longest-possible-word').setAttribute('aria-label', `Definition of ${longestPossible}`);
+  $('longest-possible-word').onclick = () => definitions.open(longestPossible);
+  $('longest-possible-length').textContent = `${longestPossible.length} letters`;
   $('empty-state').hidden = true;
   $('solution').hidden = false;
   $('score').textContent = result.score;

@@ -34,8 +34,9 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
   const byLength = Array.from({ length: 13 }, () => []);
   const needed = new Int8Array(26);
   const rejected = new Set(rejectedWords);
+  let longestPossibleWord = '';
   for (const word of dictionary) {
-    if (word.length < 2 || word.length > 12 || rejected.has(word) || (requiredMainWord && word.length > requiredMainWord.length)) continue;
+    if (word.length < 2 || word.length > 12 || rejected.has(word)) continue;
     needed.fill(0);
     let valid = true;
     let missing = 0;
@@ -43,7 +44,10 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
       const c = word.charCodeAt(i) - 65;
       if (++needed[c] > counts[c] && ++missing > blanks) { valid = false; break; }
     }
-    if (valid) byLength[word.length].push(Uint8Array.from(word, c => c.charCodeAt(0) - 64));
+    if (valid) {
+      if (word.length > longestPossibleWord.length || (word.length === longestPossibleWord.length && word < longestPossibleWord)) longestPossibleWord = word;
+      if (!requiredMainWord || word.length <= requiredMainWord.length) byLength[word.length].push(Uint8Array.from(word, c => c.charCodeAt(0) - 64));
+    }
   }
   const positional = byLength.map(words => {
     if (!words.length) return [];
@@ -72,7 +76,7 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
       if (index === -1) { index = used.indexOf('?'); blankIndices.push(i); }
       used.splice(index, 1);
     }
-    return { cells: Array.from(cells), letters, blankIndices, ...scoreBoard(cells, letters), unused: used, optimal, checked, requiredMainWord };
+    return { cells: Array.from(cells), letters, blankIndices, ...scoreBoard(cells, letters), unused: used, optimal, checked, requiredMainWord, longestPossibleWord };
   }
 
   let best = null;
@@ -83,7 +87,7 @@ export function solveRack(rack, dictionary, shapes, report = () => {}, rejectedW
     break;
   }
   // If no rack word exists, no connected arrangement with >=2 tiles exists.
-  if (!best) return { cells: [], letters: [], blankIndices: [], score: 0, longest: 0, bonus: 0, words: [], unused: [...rack], optimal: true, checked: 0 };
+  if (!best) return { cells: [], letters: [], blankIndices: [], score: 0, longest: 0, bonus: 0, words: [], unused: [...rack], optimal: true, checked: 0, longestPossibleWord };
 
   const remaining = counts.slice();
   let remainingBlanks = blanks;
