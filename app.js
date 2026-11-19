@@ -67,7 +67,7 @@ function createWorker() {
       finish();
       renderResult(best);
       $('search-status').textContent = best.words.length
-        ? `Proven optimal${requiredMainWord ? ` with ${requiredMainWord}` : ''} · ${((performance.now() - started) / 1000).toFixed(1)}s · ${commonWords ? 'common words + your short-word lists' : 'SOWPODS with your word lists'}`
+        ? `Proven optimal${requiredMainWord ? ` with ${requiredMainWord}` : ''} · ${((performance.now() - started) / 1000).toFixed(1)}s · ${commonWords ? 'common words + short-word lists' : 'SOWPODS with your word lists'}`
         : commonWords ? 'No solution with the current common-word list and rejections. Try Use SOWPODS or Reset rejections.' : rejectedWords.size ? 'No valid words remain with these rejections. Reset rejections to try the full list again.' : 'No valid word can be made with these letters. Try a different rack.';
       if (scrollToResult && matchMedia('(max-width: 640px), (orientation: landscape) and (max-height: 600px)').matches) {
         document.querySelector('.result-panel').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
