@@ -1,4 +1,4 @@
-import { solveRack } from './solver.js';
+import { solveRack, getLongestRackWords } from './solver.js';
 import { prepareDictionary, prepareCommonDictionary } from './dictionary.js';
 import { checkArrangement } from './play-model.js';
 
@@ -24,7 +24,8 @@ const ready = Promise.all([
   loadText('./data/common-words.txt'),
 ]).then(([text, shapes, pairs, triples, commonText]) => {
   const dictionary = prepareDictionary(text, pairs, triples);
-  return { dictionary, dictionarySet: new Set(dictionary), commonDictionary: prepareCommonDictionary(dictionary, commonText), shapes };
+  const commonDictionary = prepareCommonDictionary(dictionary, commonText);
+  return { dictionary, dictionarySet: new Set(dictionary), commonDictionary, commonSet: new Set(commonDictionary), shapes };
 });
 ready.then(({ dictionary }) => postMessage({
   type: 'ready',
@@ -33,7 +34,7 @@ ready.then(({ dictionary }) => postMessage({
 
 self.onmessage = async ({ data }) => {
   try {
-    const { dictionary, dictionarySet, commonDictionary, shapes } = await ready;
+    const { dictionary, dictionarySet, commonDictionary, commonSet, shapes } = await ready;
     if (data.type === 'word-validity') {
       postMessage({ type: 'word-validity', id: data.id, valid: dictionarySet.has(data.word) });
       return;
@@ -43,8 +44,11 @@ self.onmessage = async ({ data }) => {
       return;
     }
     const selectedDictionary = data.commonWords ? commonDictionary : dictionary;
-    const result = solveRack(data.rack, selectedDictionary, shapes, update => postMessage(update), data.rejectedWords || [], data.requiredMainWord || '');
-    postMessage({ type: 'result', result });
+    const longestPossibleWords = getLongestRackWords(data.rack, dictionary, commonSet, data.rejectedWords || []);
+    const result = solveRack(data.rack, selectedDictionary, shapes, update => {
+      postMessage(update.type === 'best' ? { ...update, result: { ...update.result, longestPossibleWords } } : update);
+    }, data.rejectedWords || [], data.requiredMainWord || '');
+    postMessage({ type: 'result', result: { ...result, longestPossibleWords } });
   } catch (error) {
     if (data.type === 'word-validity') {
       postMessage({ type: 'word-validity', id: data.id, error: error.message });

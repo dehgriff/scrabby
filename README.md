@@ -78,7 +78,7 @@ Choose **Solve with my word** to optimise around your played word instead of sea
 
 The result identifies the fixed main word. Reject buttons are hidden while a word is fixed, since rejecting it would contradict the constraint. Choose **Solve**, or use **Solve** in section one, to search freely. Switching between fixed and free searches clears previous solver rejections.
 
-The bottom of the solution section shows one **Longest possible word** for the rack, with a clickable definition pill. It uses the active dictionary and short-word lists, respects blanks and solver rejections, and chooses alphabetically if several words tie. This can be longer than the word in the highest-scoring crossword, and is not limited by **Solve with my word**.
+The bottom of the solution section compares **Longest possible words SOWPODS & common**, with two definition pills side by side. Each uses its respective dictionary and the configured short-word lists, respects blanks and solver rejections, and chooses alphabetically if several words tie. Both are shown regardless of the crossword solver's dictionary mode. These words can be longer than the word in the highest-scoring crossword, and are not limited by **Solve with my word**. A dictionary with no possible word shows a disabled “None” pill.
 
 ## Rules and exactness
 

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
-import { solveRack, getSlots } from '../solver.js';
+import { solveRack, getSlots, getLongestRackWords } from '../solver.js';
 import { createTiles, moveTile, getPlayMainWord } from '../play-model.js';
 import { prepareCommonDictionary } from '../dictionary.js';
 
@@ -74,6 +74,25 @@ test('the longest possible word follows the active dictionary and rejections', (
   assert.equal(solveRack(rack, words, noShapes).longestPossibleWord, 'DETENT');
   assert.equal(solveRack(rack, common, noShapes).longestPossibleWord, 'CATS');
   assert.equal(solveRack(rack, words, noShapes, () => {}, ['DETENT']).longestPossibleWord, 'CATS');
+});
+
+test('both dictionary maxima are compared independently, including rejections and no common match', () => {
+  const words = ['IE', 'CAT', 'CATS', 'DETENT'];
+  const common = prepareCommonDictionary(words, 'CATS');
+  assert.deepEqual(getLongestRackWords('CATSDETENT??', words, common), { sowpods: 'DETENT', common: 'CATS' });
+  assert.deepEqual(getLongestRackWords('CATSDETENT??', words, common, ['DETENT', 'CATS']), { sowpods: 'CAT', common: 'CAT' });
+  assert.deepEqual(getLongestRackWords('DETENTZZZZZZ', ['DETENT'], []), { sowpods: 'DETENT', common: '' });
+  assert.deepEqual(getLongestRackWords('IEZZZZZZZZZZ', words, common), { sowpods: 'IE', common: 'IE' });
+});
+
+test('dictionary comparison uses exact blank counts, alphabetical ties and validated racks', () => {
+  const words = ['BAAA', 'AAAB', 'AAAA', 'AB'];
+  const common = new Set(['AAAB', 'AB']);
+  assert.deepEqual(getLongestRackWords('AAA?ZZZZZZZZ', words, common), { sowpods: 'AAAA', common: 'AAAB' });
+  assert.deepEqual(getLongestRackWords('A??ZZZZZZZZZ', words, common), { sowpods: 'AB', common: 'AB' });
+  assert.deepEqual(getLongestRackWords('ZZZZZZZZZZZZ', words, common), { sowpods: '', common: '' });
+  assert.throws(() => getLongestRackWords('CAT', words, common), /exactly 12/);
+  assert.throws(() => getLongestRackWords('AAAAAAA?????', words, common), /at most 4/);
 });
 
 test('the longest possible word respects physical blanks and counts, with alphabetical ties', () => {

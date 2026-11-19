@@ -1787,3 +1787,12 @@ h1>span {
   padding-top: 16px;
   border-top: 1px solid var(--border)
 }
+
+.longest-word-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px
+}
+#longest-possible-lengths { white-space: nowrap; flex-shrink: 0; margin-left: 8px }
+.longest-word-pills .word-chip:disabled { opacity: .5; cursor: default }

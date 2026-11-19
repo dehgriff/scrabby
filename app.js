@@ -242,12 +242,22 @@ function solve({ preserveView = false, requiredWord = requiredMainWord } = {}) {
 }
 
 function renderResult(result) {
-  const longestPossible = result.longestPossibleWord || '';
-  $('longest-possible').hidden = !longestPossible;
-  $('longest-possible-word').textContent = longestPossible;
-  $('longest-possible-word').setAttribute('aria-label', `Definition of ${longestPossible}`);
-  $('longest-possible-word').onclick = () => definitions.open(longestPossible);
-  $('longest-possible-length').textContent = `${longestPossible.length} letters`;
+  $('longest-possible').hidden = false;
+  const sowpodsLength = result.longestPossibleWords?.sowpods?.length || 0;
+  const commonLength = result.longestPossibleWords?.common?.length || 0;
+  $('longest-possible-lengths').textContent = `${sowpodsLength || '—'} / ${commonLength || '—'} letters`;
+  $('longest-possible-lengths').setAttribute('aria-label', `SOWPODS: ${sowpodsLength} letters; common: ${commonLength} letters`);
+  $('longest-possible-words').replaceChildren(...[['sowpods', 'SOWPODS'], ['common', 'Common']].map(([key, label]) => {
+    const word = result.longestPossibleWords?.[key] || '';
+    const pill = document.createElement('button');
+    pill.className = 'word-chip is-longest';
+    pill.disabled = !word;
+    pill.setAttribute('aria-label', word ? `${label}: definition of ${word}, ${word.length} letters` : `${label}: no word possible`);
+    pill.title = word ? `${label}: ${word.length} letters · tap for definition` : 'No word possible';
+    pill.textContent = word || 'None';
+    pill.onclick = () => definitions.open(word);
+    return pill;
+  }));
   $('empty-state').hidden = true;
   $('solution').hidden = false;
   $('score').textContent = result.score;

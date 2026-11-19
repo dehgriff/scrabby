@@ -2,6 +2,37 @@
 // preserves reading direction, so each shape and its transpose need only one entry.
 export const MAX_BLANKS = 4;
 
+// Compare both word lists without running a second crossword search.
+export function getLongestRackWords(rack, dictionary, commonDictionary, rejectedWords = []) {
+  if (!/^[A-Z?]{12}$/.test(rack)) throw new Error('Choose exactly 12 letters or blanks.');
+  const counts = new Int8Array(26);
+  let blanks = 0;
+  for (const letter of rack) {
+    if (letter === '?') blanks++;
+    else counts[letter.charCodeAt(0) - 65]++;
+  }
+  if (blanks > MAX_BLANKS) throw new Error(`Choose at most ${MAX_BLANKS} blank tiles.`);
+  const common = commonDictionary instanceof Set ? commonDictionary : new Set(commonDictionary);
+  const rejected = new Set(rejectedWords);
+  const longest = { sowpods: '', common: '' };
+  const needed = new Int8Array(26);
+  for (const word of dictionary) {
+    if (word.length < 2 || word.length > rack.length || rejected.has(word)) continue;
+    needed.fill(0);
+    let missing = 0;
+    for (const letter of word) {
+      const index = letter.charCodeAt(0) - 65;
+      if (++needed[index] > counts[index]) missing++;
+      if (missing > blanks) break;
+    }
+    if (missing > blanks) continue;
+    for (const key of common.has(word) ? ['sowpods', 'common'] : ['sowpods']) {
+      if (word.length > longest[key].length || (word.length === longest[key].length && word < longest[key])) longest[key] = word;
+    }
+  }
+  return longest;
+}
+
 export function getSlots(cells) {
   const index = new Map(Array.from(cells, (p, i) => [p, i]));
   const slots = [];
