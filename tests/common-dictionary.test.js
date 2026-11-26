@@ -25,7 +25,7 @@ test('the common list cannot introduce non-SOWPODS words or override short-word 
 
 test('bundled common words are unique, sorted SOWPODS entries of 4–12 letters', () => {
   const entries = commonText.trim().split('\n');
-  assert.equal(entries.length, 12204);
+  assert.equal(entries.length, 51966);
   assert.equal(new Set(entries).size, entries.length);
   assert.deepEqual(entries, [...entries].sort());
   const sowpods = new Set(dictionary);
@@ -34,6 +34,6 @@ test('bundled common words are unique, sorted SOWPODS entries of 4–12 letters'
     assert.ok(sowpods.has(word), `${word} must be SOWPODS`);
   }
   const common = new Set(entries);
-  for (const word of ['FRIEND', 'GARDEN', 'LETTER', 'SPEED', 'TOWER']) assert.ok(common.has(word));
-  for (const word of ['DETENT', 'INHERE', 'RIBIER', 'PITHIER', 'REEMIT', 'ANATTO']) assert.ok(!common.has(word));
+  for (const word of ['FRIEND', 'GARDEN', 'LETTER', 'SPEED', 'TOWER', 'CRUMPET', 'COURGETTE', 'COLANDER', 'PREBENDARY']) assert.ok(common.has(word));
+  for (const word of ['COLUMBARIUM', 'HARTSHORN', 'PRAJNA', 'PRANAYAMA', 'WOODLOUSE', 'SECATEURS', 'ABIOGENISTS', 'LITHOPHANE', 'LATHEN', 'LOIPEN', 'HOLPEN', 'TRANSHUMANCE', 'LACINESS', 'RIBIER', 'PITHIER', 'REEMIT', 'ANATTO']) assert.ok(!common.has(word));
 });

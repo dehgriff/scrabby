@@ -1,14 +1,14 @@
 Scrabby common-word selection
 
-Generated 14 November 2026 using wordfreq 3.1.1 by Robyn Speer.
+Generated 26 November 2026 using wordfreq 3.1.1 by Robyn Speer.
 Source: https://github.com/rspeer/wordfreq
 Frequency data: https://pypi.org/project/wordfreq/3.1.1/
 
 Selection and modifications:
-- English Zipf frequency >= 3.5 (approximately 3.16 occurrences per million).
+- English Zipf frequency >= 2.0 (approximately once per 10 million words).
 - ASCII words of 4 to 12 letters, intersected with Scrabby's bundled SOWPODS.
 - Uppercased, deduplicated and sorted; no frequency scores included.
-- 12,204 entries at generation time.
+- 51,966 entries at generation time.
 
 This frequency-derived selection is shared under Creative Commons
 Attribution-ShareAlike 4.0 International:

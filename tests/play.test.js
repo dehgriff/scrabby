@@ -141,8 +141,8 @@ const dictionary = prepareDictionary(gunzipSync(readFileSync(new URL('../data/so
 
 test('play checks SOWPODS and the editable short lists without applying the common-word filter', () => {
   const common = new Set(prepareCommonDictionary(dictionary, read('common-words.txt')));
-  assert.equal(common.has('DETENT'), false);
-  assert.equal(checkArrangement(arrange('DETENT', [...'DETENT'].map((_, x) => [x, 0])), new Set(dictionary)).valid, true);
+  assert.equal(common.has('HOLPEN'), false);
+  assert.equal(checkArrangement(arrange('HOLPEN', [...'HOLPEN'].map((_, x) => [x, 0])), new Set(dictionary)).valid, true);
   const restricted = prepareDictionary('AT QI CAT DETENT', 'AT', 'CAT');
   assert.equal(checkArrangement(arrange('QI', [[0, 0], [1, 0]]), new Set(restricted)).valid, false);
   assert.equal(checkArrangement(arrange('AT', [[0, 0], [1, 0]]), new Set(restricted)).valid, true);
